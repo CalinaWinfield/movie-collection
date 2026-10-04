@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { 
   X, Star, Heart, Calendar, Clock, Film, Tv, Gamepad2, 
-  Handshake, Plus, Trash2, Edit3, Check, DollarSign, Tag,
-  Barcode, MapPin, Package, ShieldCheck, ExternalLink, RotateCcw
+  Plus, Trash2, Edit3, Check, DollarSign, Tag,
+  Barcode, MapPin, Package, ShieldCheck, ExternalLink
 } from 'lucide-react';
 import { FormatBadge } from './FormatBadge';
 import { client } from '../api/client';
@@ -15,10 +15,9 @@ export function ItemDetailModal({
   shelves = [],
   onRefreshData 
 }) {
-  const [activeTab, setActiveTab] = useState('editions'); // 'editions', 'loan', 'notes'
+  const [activeTab, setActiveTab] = useState('editions'); // 'editions', 'notes'
   const [isEditingItem, setIsEditingItem] = useState(false);
   const [isAddingEdition, setIsAddingEdition] = useState(false);
-  const [isLending, setIsLending] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Edit item form state
@@ -50,15 +49,6 @@ export function ItemDetailModal({
     retailer: '',
     storage_location: '',
     barcode: '',
-    notes: ''
-  });
-
-  // Loan form state
-  const [loanForm, setLoanForm] = useState({
-    borrower_name: '',
-    borrower_contact: '',
-    loan_date: new Date().toISOString().split('T')[0],
-    due_date: '',
     notes: ''
   });
 
@@ -128,34 +118,6 @@ export function ItemDetailModal({
       alert('Error deleting edition: ' + err.message);
     }
   };
-
-  const handleCreateLoan = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await client.post('/loans', {
-        item_id: item.id,
-        ...loanForm
-      });
-      setIsLending(false);
-      onRefreshData();
-    } catch (err) {
-      alert('Error recording loan: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReturnLoan = async (loanId) => {
-    try {
-      await client.put(`/loans/${loanId}/return`, {});
-      onRefreshData();
-    } catch (err) {
-      alert('Error marking as returned: ' + err.message);
-    }
-  };
-
-  const activeLoan = item.loans?.find(l => l.is_returned === 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-sm">
@@ -299,18 +261,6 @@ export function ItemDetailModal({
             >
               <Package className="w-4 h-4" />
               <span>Editions & Formats ({item.editions?.length || 0})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('loan')}
-              className={`py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all ${
-                activeTab === 'loan'
-                  ? 'border-amber-500 text-amber-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Handshake className="w-4 h-4" />
-              <span>Lent Out Tracker {activeLoan && '⚠️'}</span>
             </button>
 
             <button
@@ -633,155 +583,7 @@ export function ItemDetailModal({
             </div>
           )}
 
-          {/* TAB 2: LENT OUT TRACKER */}
-          {activeTab === 'loan' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-slate-100 text-sm">Media Lending Tracker</h3>
-                  <p className="text-xs text-slate-400">Keep track of which friend or family member borrowed your disc or cartridge</p>
-                </div>
-
-                {!activeLoan && !isLending && (
-                  <button
-                    onClick={() => setIsLending(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/30 text-xs font-semibold"
-                  >
-                    <Handshake className="w-3.5 h-3.5" />
-                    <span>Lend This Title</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Active Loan Alert Banner */}
-              {activeLoan && (
-                <div className="p-5 rounded-2xl bg-amber-950/30 border border-amber-500/40 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded">
-                        CURRENTLY ON LOAN
-                      </span>
-                      <h4 className="text-base font-bold text-slate-100 mt-2">
-                        Borrowed by {activeLoan.borrower_name}
-                      </h4>
-                      {activeLoan.borrower_contact && (
-                        <p className="text-xs text-slate-400">Contact: {activeLoan.borrower_contact}</p>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => handleReturnLoan(activeLoan.id)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-lg transition-all"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Mark Returned</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs text-slate-300 pt-2 border-t border-amber-500/20">
-                    <span>Lent Date: <strong>{activeLoan.loan_date}</strong></span>
-                    {activeLoan.due_date && <span>Expected Return: <strong>{activeLoan.due_date}</strong></span>}
-                  </div>
-
-                  {activeLoan.notes && (
-                    <p className="text-xs text-slate-400 italic">Notes: "{activeLoan.notes}"</p>
-                  )}
-                </div>
-              )}
-
-              {/* Lending Form */}
-              {isLending && (
-                <form onSubmit={handleCreateLoan} className="p-5 rounded-2xl bg-surface-elevated border border-emerald-500/40 space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">Lend to a Friend</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs text-slate-400">Borrower Name *</label>
-                      <input
-                        type="text"
-                        placeholder="Friend / Family name"
-                        value={loanForm.borrower_name}
-                        onChange={(e) => setLoanForm({ ...loanForm, borrower_name: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-400">Contact (Phone / Email)</label>
-                      <input
-                        type="text"
-                        placeholder="Optional"
-                        value={loanForm.borrower_contact}
-                        onChange={(e) => setLoanForm({ ...loanForm, borrower_contact: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-400">Date Lent</label>
-                      <input
-                        type="date"
-                        value={loanForm.loan_date}
-                        onChange={(e) => setLoanForm({ ...loanForm, loan_date: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-400">Expected Due Date</label>
-                      <input
-                        type="date"
-                        value={loanForm.due_date}
-                        onChange={(e) => setLoanForm({ ...loanForm, due_date: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="text-xs text-slate-400">Lending Notes</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Taking disc only in protective sleeve"
-                        value={loanForm.notes}
-                        onChange={(e) => setLoanForm({ ...loanForm, notes: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsLending(false)}
-                      className="px-4 py-2 text-xs text-slate-300 hover:bg-surface rounded-lg"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg"
-                    >
-                      Confirm Loan
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Loan History */}
-              {item.loans && item.loans.length > 0 && (
-                <div className="pt-2">
-                  <h4 className="text-xs font-semibold text-slate-400 mb-2">Loan History</h4>
-                  <div className="space-y-2">
-                    {item.loans.filter(l => l.is_returned === 1).map((l) => (
-                      <div key={l.id} className="p-3 rounded-xl bg-surface border border-surface-border text-xs flex justify-between text-slate-400">
-                        <span>Borrowed by <strong className="text-slate-200">{l.borrower_name}</strong></span>
-                        <span>Returned: {l.returned_date || 'Returned'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 3: NOTES & DETAILS */}
+          {/* TAB 2: NOTES & DETAILS */}
           {activeTab === 'notes' && (
             <div className="space-y-4">
               <div>

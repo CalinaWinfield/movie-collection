@@ -7,13 +7,12 @@ import { ShelfView } from './components/ShelfView';
 import { ItemDetailModal } from './components/ItemDetailModal';
 import { AddItemModal } from './components/AddItemModal';
 import { ShelvesModal } from './components/ShelvesModal';
-import { LentModal } from './components/LentModal';
 import { StatsModal } from './components/StatsModal';
 import { ExportImportModal } from './components/ExportImportModal';
 import { AuthModal } from './components/AuthModal';
 import { 
   Film, Tv, Gamepad2, Plus, SlidersHorizontal, ArrowUpDown, 
-  Sparkles, Layers, Handshake, Heart, Shield, RefreshCw, Loader2,
+  Sparkles, Layers, Heart, Shield, RefreshCw, Loader2,
   FolderOpen
 } from 'lucide-react';
 
@@ -32,14 +31,12 @@ export function App() {
   // Data state
   const [items, setItems] = useState([]);
   const [shelves, setShelves] = useState([]);
-  const [activeLoansCount, setActiveLoansCount] = useState(0);
   const [loadingData, setLoadingData] = useState(true);
 
   // Modals state
   const [selectedItem, setSelectedItem] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isShelvesModalOpen, setIsShelvesModalOpen] = useState(false);
-  const [isLentModalOpen, setIsLentModalOpen] = useState(false);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
@@ -59,10 +56,6 @@ export function App() {
 
       const res = await client.get('/items', params);
       setItems(res.items || []);
-
-      // Count active loans
-      const loansRes = await client.get('/loans', { active_only: '1' });
-      setActiveLoansCount(loansRes.loans?.length || 0);
     } catch (err) {
       console.error('Error fetching items:', err);
     } finally {
@@ -155,10 +148,8 @@ export function App() {
         setViewMode={setViewMode}
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onOpenShelvesModal={() => setIsShelvesModalOpen(true)}
-        onOpenLentModal={() => setIsLentModalOpen(true)}
         onOpenStatsModal={() => setIsStatsModalOpen(true)}
         onOpenBackupModal={() => setIsBackupModalOpen(true)}
-        activeLoansCount={activeLoansCount}
       />
 
       {/* Main Container */}
@@ -358,12 +349,6 @@ export function App() {
         onRefresh={fetchShelves}
         onSelectShelf={(id) => setSelectedShelfId(id)}
         selectedShelfId={selectedShelfId}
-      />
-
-      <LentModal
-        isOpen={isLentModalOpen}
-        onClose={() => setIsLentModalOpen(false)}
-        onRefresh={fetchItems}
       />
 
       <StatsModal

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Disc, Heart, Handshake } from 'lucide-react';
+import { Disc, Heart } from 'lucide-react';
 
 export function ShelfView({ items, onItemClick }) {
   if (items.length === 0) {
@@ -97,7 +97,6 @@ export function ShelfView({ items, onItemClick }) {
         <div className="relative z-10 flex items-end gap-1.5 overflow-x-auto pb-4 pt-10 px-2 scrollbar-thin">
           {items.map((item) => {
             const style = getSpineStyle(item);
-            const isLent = Boolean(item.active_borrower);
 
             return (
               <div
@@ -127,13 +126,7 @@ export function ShelfView({ items, onItemClick }) {
 
                 {/* Bottom Disc / Format indicator */}
                 <div className="w-full flex flex-col items-center pb-2">
-                  {isLent ? (
-                    <div className="bg-amber-400 text-slate-950 p-1 rounded-full shadow" title={`Lent to ${item.active_borrower}`}>
-                      <Handshake className="w-3 h-3" />
-                    </div>
-                  ) : (
-                    <Disc className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform duration-700" />
-                  )}
+                  <Disc className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform duration-700" />
                   {item.release_year && (
                     <span className="text-[9px] opacity-75 font-mono mt-0.5">
                       {item.release_year}

@@ -12,12 +12,10 @@ router.get('/export/json', requireAuth, (req, res) => {
   
   const itemIds = items.map(i => i.id);
   let editions = [];
-  let loans = [];
 
   if (itemIds.length > 0) {
     const placeholders = itemIds.map(() => '?').join(',');
     editions = dbHelper.query(`SELECT * FROM editions WHERE item_id IN (${placeholders})`, itemIds);
-    loans = dbHelper.query(`SELECT * FROM loans WHERE item_id IN (${placeholders})`, itemIds);
   }
 
   const exportData = {
@@ -26,8 +24,7 @@ router.get('/export/json', requireAuth, (req, res) => {
     user: user?.username,
     shelves,
     items,
-    editions,
-    loans
+    editions
   };
 
   res.setHeader('Content-Disposition', `attachment; filename="kolekino_backup_${user?.username || 'collection'}.json"`);
@@ -447,24 +444,6 @@ router.post('/seed-sample', requireAuth, (req, res) => {
       );
     }
     added++;
-  }
-
-  // Also add 1 active loan so the user can test the Lent Out feature
-  const duneItem = dbHelper.get('SELECT id FROM items WHERE user_id = ? AND title = ?', [userId, 'Dune: Part Two']);
-  if (duneItem) {
-    dbHelper.run(
-      `INSERT INTO loans (user_id, item_id, borrower_name, borrower_contact, loan_date, due_date, notes, is_returned)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-      [
-        userId,
-        duneItem.id,
-        'Marcus Vance (Friend)',
-        'marcus@example.com / 555-0142',
-        new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0],
-        new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        'Borrowed the 4K Steelbook for movie night, handles discs carefully.'
-      ]
-    );
   }
 
   res.json({ success: true, count: added });

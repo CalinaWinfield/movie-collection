@@ -1,11 +1,10 @@
 import React from 'react';
-import { Star, Heart, Handshake, Film, Tv, Gamepad2 } from 'lucide-react';
+import { Star, Heart, Film, Tv, Gamepad2 } from 'lucide-react';
 import { FormatBadge } from './FormatBadge';
 
 export function ItemCard({ item, onClick, onToggleFavorite }) {
   const primaryEdition = item.editions?.[0];
   const hasSlipcover = item.editions?.some(e => e.slipcover === 1);
-  const isLent = Boolean(item.active_borrower);
 
   const CategoryIcon = item.category === 'tv' ? Tv : (item.category === 'game' ? Gamepad2 : Film);
 
@@ -51,14 +50,6 @@ export function ItemCard({ item, onClick, onToggleFavorite }) {
           <span className="text-xs font-semibold text-slate-400 line-clamp-2">{item.title}</span>
           <span className="text-[10px] text-slate-600 mt-1">{item.release_year || 'Unknown Year'}</span>
         </div>
-
-        {/* Kolekino Lent Out Banner */}
-        {isLent && (
-          <div className="absolute top-2 left-2 z-20 flex items-center gap-1 bg-amber-500/95 text-slate-950 px-2 py-0.5 rounded-md text-[11px] font-bold shadow-lg backdrop-blur-sm">
-            <Handshake className="w-3.5 h-3.5" />
-            <span>LENT OUT</span>
-          </div>
-        )}
 
         {/* Favorite toggle button */}
         <button
@@ -127,19 +118,13 @@ export function ItemCard({ item, onClick, onToggleFavorite }) {
 
         {/* Footer info: Shelf or Storage Location */}
         <div className="pt-2 mt-1 border-t border-surface-border flex items-center justify-between text-[11px] text-slate-400">
-          <span className="truncate max-w-[120px]" title={item.shelf_name || 'Unassigned'}>
+          <span className="truncate max-w-[130px]" title={item.shelf_name || 'Unassigned'}>
             {item.shelf_name ? `📁 ${item.shelf_name}` : 'Shelf: Unsorted'}
           </span>
-          {isLent ? (
-            <span className="text-amber-400 font-semibold truncate max-w-[90px]" title={`With ${item.active_borrower}`}>
-              With {item.active_borrower}
+          {primaryEdition?.storage_location && (
+            <span className="truncate max-w-[110px] text-slate-500" title={primaryEdition.storage_location}>
+              📍 {primaryEdition.storage_location}
             </span>
-          ) : (
-            primaryEdition?.storage_location && (
-              <span className="truncate max-w-[90px] text-slate-500" title={primaryEdition.storage_location}>
-                📍 {primaryEdition.storage_location}
-              </span>
-            )
           )}
         </div>
       </div>

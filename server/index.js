@@ -8,7 +8,6 @@ const bcrypt = require('bcryptjs');
 const authRoutes = require('./routes/auth');
 const itemsRoutes = require('./routes/items');
 const shelvesRoutes = require('./routes/shelves');
-const loansRoutes = require('./routes/loans');
 const statsRoutes = require('./routes/stats');
 const lookupRoutes = require('./routes/lookup');
 const backupRoutes = require('./routes/backup');
@@ -25,7 +24,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemsRoutes);
 app.use('/api/shelves', shelvesRoutes);
-app.use('/api/loans', loansRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/lookup', lookupRoutes);
 app.use('/api/backup', backupRoutes);
@@ -294,23 +292,6 @@ async function ensureDemoData() {
       }
     }
 
-    // Add sample loan
-    const dune = dbHelper.get('SELECT id FROM items WHERE user_id = ? AND title LIKE ?', [demoUserId, '%Dune%']);
-    if (dune) {
-      dbHelper.run(
-        `INSERT INTO loans (user_id, item_id, borrower_name, borrower_contact, loan_date, due_date, notes, is_returned)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-        [
-          demoUserId,
-          dune.id,
-          'Marcus Vance (Friend)',
-          'marcus@example.com',
-          new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-          new Date(Date.now() + 9 * 86400000).toISOString().split('T')[0],
-          'Borrowed the 4K Steelbook for weekend movie marathon.'
-        ]
-      );
-    }
     console.log('Demo collector account seeded successfully! (user: cinephile, pass: demo1234)');
   }
 }

@@ -22,17 +22,11 @@ A modern, cinematic media tracking web application inspired by **[Kolekino](http
   - **PlayStation 5**: Crisp white & electric blue spine branding.
 - Hover over any spine to pull the case forward from the shelf!
 
-### 3. 🤝 Media Lending Tracker ("Lent Out" Hub)
-- Track who borrowed your discs, box sets, or games.
-- Record borrower name, contact information, date lent, expected return date, and personal notes.
-- Dedicated "Lent Out" indicator badge in the top navigation.
-- 1-click **"Mark Returned"** to archive the loan.
-
-### 4. 🗂️ Themed Curated Shelves
+### 3. 🗂️ Themed Curated Shelves
 - Create custom themed shelves (e.g., *"4K Steelbooks"*, *"Criterion Collection"*, *"Favorites"*, *"Sci-Fi Classics"*, *"Cozy Switch Games"*).
 - Customize shelf accent colors and filter your entire library by shelf with one click.
 
-### 5. 🔍 Zero-Config Live Auto-Lookup & Media Autofill
+### 4. 🔍 Zero-Config Live Auto-Lookup & Media Autofill
 - Search any **Movie**, **TV Show**, or **Video Game** to automatically pull:
   - Official cover artwork / poster
   - Release year
@@ -41,14 +35,14 @@ A modern, cinematic media tracking web application inspired by **[Kolekino](http
 - Works out of the box with zero external API key requirements.
 - Full support for manual entry for boutique imports, bootlegs, or rare limited pressings.
 
-### 6. 📊 Collector Insights & Statistics Dashboard
+### 5. 📊 Collector Insights & Statistics Dashboard
 - Total collection counts and category distribution.
 - Format breakdown (4K UHD vs Blu-ray vs Steelbook vs Switch vs PS5).
 - Estimated collection financial valuation & average price per title.
 - Slipcover ratio tracking.
 - Completion progress (*Owned, In Progress, Completed, Wishlist*).
 
-### 7. 💾 Export, Import & Curated Starter Collection
+### 6. 💾 Export, Import & Curated Starter Collection
 - 1-click **"Load Curated Sample Library"** to pre-populate acclaimed titles (*Dune: Part Two Steelbook, Oppenheimer slipcover, Criterion Seven Samurai, Breaking Bad Barrel Box Set, Zelda: Tears of the Kingdom Collector's Edition, Elden Ring Launch Edition*).
 - Export complete collection as **JSON** or **CSV** (for spreadsheets).
 - Import from backup JSON files.

@@ -70,14 +70,6 @@ router.get('/', requireAuth, (req, res) => {
     [userId]
   );
 
-  // Active loans (lent out)
-  const activeLoansCount = dbHelper.get(
-    `SELECT COUNT(*) as count 
-     FROM loans 
-     WHERE user_id = ? AND is_returned = 0`,
-    [userId]
-  )?.count || 0;
-
   // Favorites count
   const favoritesCount = dbHelper.get(
     `SELECT COUNT(*) as count 
@@ -114,7 +106,6 @@ router.get('/', requireAuth, (req, res) => {
     slipcoverCount,
     totalSpent: Math.round((financial?.total_spent || 0) * 100) / 100,
     avgPrice: Math.round((financial?.avg_price || 0) * 100) / 100,
-    activeLoansCount,
     favoritesCount,
     shelfStats,
     avgRating: ratingStats?.avg_rating ? Math.round(ratingStats.avg_rating * 10) / 10 : 0,

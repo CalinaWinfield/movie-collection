@@ -6,7 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 // GET /api/items - list items with filters
 router.get('/', requireAuth, (req, res) => {
   const userId = req.userId;
-  const { category, shelf_id, format, status, is_lent, search, sort } = req.query;
+  const { category, shelf_id, format, status, search, sort } = req.query;
 
   let query = `
     SELECT i.*, 
@@ -14,9 +14,7 @@ router.get('/', requireAuth, (req, res) => {
       (SELECT COUNT(*) FROM editions WHERE item_id = i.id) as edition_count,
       (SELECT format FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_format,
       (SELECT packaging FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_packaging,
-      (SELECT slipcover FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_slipcover,
-      (SELECT borrower_name FROM loans WHERE item_id = i.id AND is_returned = 0 LIMIT 1) as active_borrower,
-      (SELECT loan_date FROM loans WHERE item_id = i.id AND is_returned = 0 LIMIT 1) as active_loan_date
+      (SELECT slipcover FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_slipcover
     FROM items i
     LEFT JOIN shelves s ON i.shelf_id = s.id
     WHERE i.user_id = ?
@@ -36,10 +34,6 @@ router.get('/', requireAuth, (req, res) => {
   if (status && status !== 'all') {
     query += ` AND i.status = ?`;
     params.push(status);
-  }
-
-  if (is_lent === 'true' || is_lent === '1') {
-    query += ` AND EXISTS (SELECT 1 FROM loans l WHERE l.item_id = i.id AND l.is_returned = 0)`;
   }
 
   if (format && format !== 'all') {
@@ -129,18 +123,12 @@ router.get('/:id', requireAuth, (req, res) => {
     [item.id]
   );
 
-  const loans = dbHelper.query(
-    `SELECT * FROM loans WHERE item_id = ? ORDER BY loan_date DESC`,
-    [item.id]
-  );
-
   res.json({
     item: {
       ...item,
       genres: item.genres ? tryParseJson(item.genres) : [],
       tags: item.tags ? tryParseJson(item.tags) : [],
-      editions,
-      loans
+      editions
     }
   });
 });

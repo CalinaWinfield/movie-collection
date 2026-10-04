@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Film, Tv, Gamepad2, Disc, Search, Plus, Layers, 
-  Handshake, BarChart3, Download, User, LogOut, Sparkles,
+  BarChart3, Download, User, LogOut, Sparkles,
   LayoutGrid, StretchHorizontal, ListFilter
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -15,10 +15,8 @@ export function Navbar({
   setViewMode,
   onOpenAddModal,
   onOpenShelvesModal,
-  onOpenLentModal,
   onOpenStatsModal,
-  onOpenBackupModal,
-  activeLoansCount = 0
+  onOpenBackupModal
 }) {
   const { user, logout, loginDemo } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -136,25 +134,6 @@ export function Navbar({
             >
               <Layers className="w-4 h-4 text-amber-400" />
               <span className="hidden sm:inline font-medium">Shelves</span>
-            </button>
-
-            {/* Lent Out Tracker */}
-            <button
-              onClick={onOpenLentModal}
-              className={`relative flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border transition-all ${
-                activeLoansCount > 0 
-                  ? 'bg-amber-950/40 border-amber-500/40 text-amber-300' 
-                  : 'bg-surface hover:bg-surface-elevated border-surface-border text-slate-300'
-              }`}
-              title="Lent Out Tracker"
-            >
-              <Handshake className="w-4 h-4 text-emerald-400" />
-              <span className="hidden sm:inline font-medium">Lent Out</span>
-              {activeLoansCount > 0 && (
-                <span className="bg-amber-500 text-slate-950 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full ml-0.5">
-                  {activeLoansCount}
-                </span>
-              )}
             </button>
 
             {/* Collector Insights / Stats */}

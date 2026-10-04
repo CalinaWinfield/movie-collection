@@ -76,11 +76,11 @@ export function StatsModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="p-4 rounded-2xl bg-surface-elevated border border-surface-border">
-                  <span className="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Lent Out</span>
-                  <span className={`text-2xl font-black mt-1 block ${stats.activeLoansCount > 0 ? 'text-amber-400' : 'text-slate-300'}`}>
-                    {stats.activeLoansCount}
+                  <span className="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">Favorites</span>
+                  <span className="text-2xl font-black text-red-400 mt-1 block">
+                    {stats.favoritesCount || 0}
                   </span>
-                  <span className="text-[10px] text-slate-500 mt-0.5 block">Currently with friends</span>
+                  <span className="text-[10px] text-slate-500 mt-0.5 block">Starred titles</span>
                 </div>
               </div>
 
