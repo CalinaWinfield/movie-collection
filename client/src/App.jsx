@@ -113,7 +113,7 @@ export function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#090b10] flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">
         <Loader2 className="w-8 h-8 animate-spin text-amber-500 mb-2" />
       </div>
     );

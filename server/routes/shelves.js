@@ -37,23 +37,33 @@ router.post('/', requireAuth, (req, res) => {
 
 // PUT /api/shelves/:id - update shelf
 router.put('/:id', requireAuth, (req, res) => {
-  const { name, description, icon, color, sort_order } = req.body;
-  const shelf = dbHelper.get('SELECT id FROM shelves WHERE id = ? AND user_id = ?', [req.params.id, req.userId]);
+  const shelf = dbHelper.get('SELECT * FROM shelves WHERE id = ? AND user_id = ?', [req.params.id, req.userId]);
 
   if (!shelf) {
     return res.status(404).json({ error: 'Shelf not found' });
   }
 
-  dbHelper.run(
-    `UPDATE shelves SET
-      name = COALESCE(?, name),
-      description = ?,
-      icon = COALESCE(?, icon),
-      color = COALESCE(?, color),
-      sort_order = COALESCE(?, sort_order)
-    WHERE id = ?`,
-    [name?.trim(), description?.trim() || null, icon, color, sort_order, req.params.id]
-  );
+  const updates = [];
+  const params = [];
+  const allowed = ['name', 'description', 'icon', 'color', 'sort_order'];
+
+  for (const field of allowed) {
+    if (req.body[field] !== undefined) {
+      updates.push(`${field} = ?`);
+      let val = req.body[field];
+      if (field === 'sort_order') val = parseInt(val, 10) || 0;
+      else if (typeof val === 'string') val = val.trim() || null;
+      params.push(val === undefined ? null : val);
+    }
+  }
+
+  if (updates.length > 0) {
+    params.push(req.params.id);
+    dbHelper.run(
+      `UPDATE shelves SET ${updates.join(', ')} WHERE id = ?`,
+      params
+    );
+  }
 
   const updated = dbHelper.get('SELECT * FROM shelves WHERE id = ?', [req.params.id]);
   res.json({ shelf: updated });

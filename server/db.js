@@ -146,9 +146,12 @@ const dbHelper = {
 
   query(sql, params = []) {
     if (!db) throw new Error('Database not initialized');
+    const cleanParams = Array.isArray(params)
+      ? params.map(val => (val === undefined ? null : val))
+      : params;
     const stmt = db.prepare(sql);
     try {
-      stmt.bind(params);
+      stmt.bind(cleanParams);
       const rows = [];
       while (stmt.step()) {
         rows.push(stmt.getAsObject());
@@ -166,9 +169,12 @@ const dbHelper = {
 
   run(sql, params = []) {
     if (!db) throw new Error('Database not initialized');
+    const cleanParams = Array.isArray(params)
+      ? params.map(val => (val === undefined ? null : val))
+      : params;
     const stmt = db.prepare(sql);
     try {
-      stmt.bind(params);
+      stmt.bind(cleanParams);
       stmt.step();
       
       // Get last insert row id and changes

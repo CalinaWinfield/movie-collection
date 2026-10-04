@@ -236,80 +236,48 @@ router.post('/', requireAuth, (req, res) => {
 // PUT /api/items/:id - update item
 router.put('/:id', requireAuth, (req, res) => {
   const itemId = req.params.id;
-  const existing = dbHelper.get('SELECT id FROM items WHERE id = ? AND user_id = ?', [itemId, req.userId]);
+  const existing = dbHelper.get('SELECT * FROM items WHERE id = ? AND user_id = ?', [itemId, req.userId]);
   if (!existing) {
     return res.status(404).json({ error: 'Item not found' });
   }
 
-  const {
-    category,
-    title,
-    original_title,
-    release_year,
-    creator,
-    genres,
-    runtime,
-    synopsis,
-    poster_url,
-    backdrop_url,
-    status,
-    rating,
-    user_notes,
-    tags,
-    shelf_id,
-    barcode,
-    is_favorite
-  } = req.body;
+  const updates = [];
+  const params = [];
 
-  const genresStr = Array.isArray(genres) ? JSON.stringify(genres) : (genres || '');
-  const tagsStr = Array.isArray(tags) ? JSON.stringify(tags) : (tags || '');
+  const allowedFields = [
+    'category', 'title', 'original_title', 'release_year', 'creator',
+    'genres', 'runtime', 'synopsis', 'poster_url', 'backdrop_url',
+    'status', 'rating', 'user_notes', 'tags', 'shelf_id', 'barcode', 'is_favorite'
+  ];
 
-  dbHelper.run(
-    `UPDATE items SET
-      category = COALESCE(?, category),
-      title = COALESCE(?, title),
-      original_title = ?,
-      release_year = ?,
-      creator = ?,
-      genres = ?,
-      runtime = ?,
-      synopsis = ?,
-      poster_url = ?,
-      backdrop_url = ?,
-      status = COALESCE(?, status),
-      rating = COALESCE(?, rating),
-      user_notes = ?,
-      tags = ?,
-      shelf_id = ?,
-      barcode = ?,
-      is_favorite = COALESCE(?, is_favorite),
-      updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND user_id = ?`,
-    [
-      category,
-      title?.trim(),
-      original_title?.trim() || null,
-      release_year ? parseInt(release_year, 10) : null,
-      creator?.trim() || null,
-      genresStr,
-      runtime?.trim() || null,
-      synopsis?.trim() || null,
-      poster_url?.trim() || null,
-      backdrop_url?.trim() || null,
-      status,
-      rating !== undefined ? parseFloat(rating) : undefined,
-      user_notes?.trim() || null,
-      tagsStr,
-      shelf_id !== undefined ? (shelf_id ? parseInt(shelf_id, 10) : null) : undefined,
-      barcode?.trim() || null,
-      is_favorite !== undefined ? (is_favorite ? 1 : 0) : undefined,
-      itemId,
-      req.userId
-    ]
-  );
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updates.push(`${field} = ?`);
+      let val = req.body[field];
+      if (field === 'title') val = typeof val === 'string' ? (val.trim() || existing.title) : existing.title;
+      else if (field === 'category') val = typeof val === 'string' ? (val.trim() || existing.category) : existing.category;
+      else if (field === 'release_year') val = val ? parseInt(val, 10) : null;
+      else if (field === 'rating') val = val !== null && val !== '' ? parseFloat(val) : 0;
+      else if (field === 'shelf_id') val = val ? parseInt(val, 10) : null;
+      else if (field === 'is_favorite') val = val ? 1 : 0;
+      else if (field === 'genres') val = Array.isArray(val) ? JSON.stringify(val) : (typeof val === 'string' ? val : null);
+      else if (field === 'tags') val = Array.isArray(val) ? JSON.stringify(val) : (typeof val === 'string' ? val : null);
+      else if (typeof val === 'string') val = val.trim() || null;
+      params.push(val === undefined ? null : val);
+    }
+  }
+
+  if (updates.length > 0) {
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    params.push(itemId, req.userId);
+    dbHelper.run(
+      `UPDATE items SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`,
+      params
+    );
+  }
 
   const updated = dbHelper.get('SELECT * FROM items WHERE id = ?', [itemId]);
-  const editions = dbHelper.query('SELECT * FROM editions WHERE item_id = ?', [itemId]);
+  const editions = dbHelper.query('SELECT * FROM editions WHERE item_id = ? ORDER BY id ASC', [itemId]);
 
   res.json({
     item: {
@@ -402,55 +370,34 @@ router.put('/editions/:editionId', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Edition not found' });
   }
 
-  const {
-    format,
-    edition_name,
-    packaging,
-    slipcover,
-    disc_count,
-    region,
-    condition,
-    purchase_price,
-    purchase_date,
-    retailer,
-    storage_location,
-    barcode,
-    notes
-  } = req.body;
+  const updates = [];
+  const params = [];
 
-  dbHelper.run(
-    `UPDATE editions SET
-      format = COALESCE(?, format),
-      edition_name = COALESCE(?, edition_name),
-      packaging = COALESCE(?, packaging),
-      slipcover = COALESCE(?, slipcover),
-      disc_count = COALESCE(?, disc_count),
-      region = COALESCE(?, region),
-      condition = COALESCE(?, condition),
-      purchase_price = COALESCE(?, purchase_price),
-      purchase_date = ?,
-      retailer = ?,
-      storage_location = ?,
-      barcode = ?,
-      notes = ?
-    WHERE id = ?`,
-    [
-      format,
-      edition_name,
-      packaging,
-      slipcover !== undefined ? (slipcover ? 1 : 0) : undefined,
-      disc_count !== undefined ? parseInt(disc_count, 10) : undefined,
-      region,
-      condition,
-      purchase_price !== undefined ? parseFloat(purchase_price) : undefined,
-      purchase_date || null,
-      retailer || null,
-      storage_location || null,
-      barcode || null,
-      notes || null,
-      editionId
-    ]
-  );
+  const allowedFields = [
+    'format', 'edition_name', 'packaging', 'slipcover', 'disc_count',
+    'region', 'condition', 'purchase_price', 'purchase_date', 'retailer',
+    'storage_location', 'barcode', 'notes'
+  ];
+
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updates.push(`${field} = ?`);
+      let val = req.body[field];
+      if (field === 'slipcover') val = val ? 1 : 0;
+      else if (field === 'disc_count') val = parseInt(val, 10) || 1;
+      else if (field === 'purchase_price') val = parseFloat(val) || 0.0;
+      else if (typeof val === 'string') val = val.trim() || null;
+      params.push(val === undefined ? null : val);
+    }
+  }
+
+  if (updates.length > 0) {
+    params.push(editionId);
+    dbHelper.run(
+      `UPDATE editions SET ${updates.join(', ')} WHERE id = ?`,
+      params
+    );
+  }
 
   const updated = dbHelper.get('SELECT * FROM editions WHERE id = ?', [editionId]);
   res.json({ edition: updated });
