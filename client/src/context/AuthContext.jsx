@@ -29,8 +29,12 @@ export function AuthProvider({ children }) {
     loadUser();
 
     const handleExpired = () => setUser(null);
+    window.addEventListener('shelfmark_auth_expired', handleExpired);
     window.addEventListener('kolekino_auth_expired', handleExpired);
-    return () => window.removeEventListener('kolekino_auth_expired', handleExpired);
+    return () => {
+      window.removeEventListener('shelfmark_auth_expired', handleExpired);
+      window.removeEventListener('kolekino_auth_expired', handleExpired);
+    };
   }, []);
 
   const login = async (loginId, password) => {

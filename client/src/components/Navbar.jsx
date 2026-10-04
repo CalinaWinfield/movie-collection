@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Film, Tv, Gamepad2, Disc, Search, Plus, Layers, 
   BarChart3, Download, User, LogOut, Sparkles,
-  LayoutGrid, StretchHorizontal, ListFilter
+  LayoutGrid, StretchHorizontal
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -40,29 +40,29 @@ export function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-[#090b10]/90 backdrop-blur-md border-b border-surface-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+      <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12">
         <div className="flex items-center justify-between h-16 gap-4">
           
           {/* Logo & Category Switcher */}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentCategory('all')}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-glow-gold">
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentCategory('all')}>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md">
                 <Disc className="w-6 h-6 text-slate-950 animate-spin-slow" />
               </div>
               <div className="flex flex-col">
-                <span className="font-display font-extrabold text-xl tracking-wider text-slate-100 flex items-center gap-1.5">
-                  KOLEKINO
-                  <span className="text-[10px] font-sans font-semibold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                <span className="font-display font-extrabold text-xl tracking-wider text-slate-900 flex items-center gap-1.5">
+                  SHELFMARK
+                  <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
                     COLLECTOR
                   </span>
                 </span>
-                <span className="text-[11px] text-slate-400 -mt-1 tracking-tight">Physical & Media Library</span>
+                <span className="text-[11px] text-slate-500 -mt-1 tracking-tight">Physical & Media Library</span>
               </div>
             </div>
 
             {/* Category tabs */}
-            <nav className="hidden md:flex items-center space-x-1 bg-surface/80 p-1 rounded-xl border border-surface-border">
+            <nav className="hidden md:flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
               {categories.map((cat) => {
                 const Icon = cat.icon;
                 const active = currentCategory === cat.id;
@@ -70,10 +70,10 @@ export function Navbar({
                   <button
                     key={cat.id}
                     onClick={() => setCurrentCategory(cat.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
                       active
-                        ? 'bg-amber-500 text-slate-950 shadow-md font-semibold'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-surface-elevated'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -85,7 +85,7 @@ export function Navbar({
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-md mx-2">
+          <div className="flex-1 max-w-lg mx-2">
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -93,12 +93,12 @@ export function Navbar({
                 placeholder="Search collection, format, director, barcode..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-surface text-slate-100 pl-10 pr-4 py-2 text-sm rounded-xl border border-surface-border focus:outline-none focus:border-amber-500/70 focus:ring-1 focus:ring-amber-500/50 transition-all placeholder:text-slate-500"
+                className="w-full bg-slate-100 text-slate-900 pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder:text-slate-400"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200 px-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 px-1"
                 >
                   ✕
                 </button>
@@ -109,17 +109,17 @@ export function Navbar({
           {/* Action Tools & User Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* View Switchers */}
-            <div className="hidden lg:flex items-center bg-surface p-1 rounded-lg border border-surface-border">
+            <div className="hidden lg:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded text-xs transition-colors ${viewMode === 'grid' ? 'bg-surface-elevated text-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`p-1.5 rounded-lg text-xs transition-colors ${viewMode === 'grid' ? 'bg-white text-amber-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'}`}
                 title="Poster Grid"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('shelf')}
-                className={`p-1.5 rounded text-xs transition-colors ${viewMode === 'shelf' ? 'bg-surface-elevated text-amber-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`p-1.5 rounded-lg text-xs transition-colors ${viewMode === 'shelf' ? 'bg-white text-amber-600 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'}`}
                 title="Physical Shelf Spine View"
               >
                 <StretchHorizontal className="w-4 h-4" />
@@ -129,27 +129,27 @@ export function Navbar({
             {/* Shelves Manager */}
             <button
               onClick={onOpenShelvesModal}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl text-slate-300 bg-surface hover:bg-surface-elevated border border-surface-border transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-sm rounded-xl text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all font-medium"
               title="Custom Shelves"
             >
-              <Layers className="w-4 h-4 text-amber-400" />
-              <span className="hidden sm:inline font-medium">Shelves</span>
+              <Layers className="w-4 h-4 text-amber-500" />
+              <span className="hidden sm:inline">Shelves</span>
             </button>
 
             {/* Collector Insights / Stats */}
             <button
               onClick={onOpenStatsModal}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl text-slate-300 bg-surface hover:bg-surface-elevated border border-surface-border transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-sm rounded-xl text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all font-medium"
               title="Collector Stats & Insights"
             >
-              <BarChart3 className="w-4 h-4 text-sky-400" />
-              <span className="hidden sm:inline font-medium">Insights</span>
+              <BarChart3 className="w-4 h-4 text-sky-500" />
+              <span className="hidden sm:inline">Insights</span>
             </button>
 
             {/* Add Item Button */}
             <button
               onClick={onOpenAddModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-glow-gold transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-xl text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-sm transition-all"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span className="hidden sm:inline">Add Title</span>
@@ -159,40 +159,40 @@ export function Navbar({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="w-9 h-9 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center text-slate-200 hover:border-amber-500/50 transition-all"
+                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:border-amber-500/70 shadow-xs transition-all"
                 title={user?.display_name || user?.username}
               >
-                <User className="w-4 h-4 text-slate-300" />
+                <User className="w-4 h-4 text-slate-600" />
               </button>
 
               {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-surface-elevated border border-surface-border shadow-2xl py-2 z-50 text-sm">
-                  <div className="px-4 py-2 border-b border-surface-border">
-                    <p className="font-semibold text-slate-100 truncate">{user?.display_name || user?.username}</p>
-                    <p className="text-xs text-slate-400 truncate">@{user?.username}</p>
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-50 text-sm">
+                  <div className="px-4 py-2 border-b border-slate-100">
+                    <p className="font-bold text-slate-900 truncate">{user?.display_name || user?.username}</p>
+                    <p className="text-xs text-slate-500 truncate">@{user?.username}</p>
                   </div>
 
                   <button
                     onClick={() => { setUserDropdownOpen(false); onOpenBackupModal(); }}
-                    className="w-full text-left px-4 py-2 text-slate-300 hover:bg-surface hover:text-white flex items-center gap-2.5 transition-colors"
+                    className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2.5 transition-colors"
                   >
-                    <Download className="w-4 h-4 text-amber-400" />
+                    <Download className="w-4 h-4 text-amber-500" />
                     <span>Import / Export & Backup</span>
                   </button>
 
                   <button
                     onClick={() => { setUserDropdownOpen(false); loginDemo(); }}
-                    className="w-full text-left px-4 py-2 text-slate-300 hover:bg-surface hover:text-white flex items-center gap-2.5 transition-colors"
+                    className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2.5 transition-colors"
                   >
-                    <Sparkles className="w-4 h-4 text-sky-400" />
+                    <Sparkles className="w-4 h-4 text-sky-500" />
                     <span>Switch to Demo Library</span>
                   </button>
 
-                  <div className="border-t border-surface-border my-1"></div>
+                  <div className="border-t border-slate-100 my-1"></div>
 
                   <button
                     onClick={() => { setUserDropdownOpen(false); logout(); }}
-                    className="w-full text-left px-4 py-2 text-red-400 hover:bg-surface hover:text-red-300 flex items-center gap-2.5 transition-colors"
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors font-medium"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Sign Out</span>
@@ -206,7 +206,7 @@ export function Navbar({
         </div>
 
         {/* Mobile category bar */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-surface-border/50">
+        <div className="flex md:hidden items-center justify-around py-2 border-t border-slate-200">
           {categories.map((cat) => {
             const Icon = cat.icon;
             const active = currentCategory === cat.id;
@@ -214,8 +214,8 @@ export function Navbar({
               <button
                 key={cat.id}
                 onClick={() => setCurrentCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                  active ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400'
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  active ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-600'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />

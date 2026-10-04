@@ -145,35 +145,35 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
       <div 
-        className="relative w-full max-w-3xl bg-surface rounded-3xl border border-surface-border shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-3xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 bg-surface-elevated border-b border-surface-border flex items-center justify-between">
+        <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
               <Plus className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100 font-display">Add to Collection</h2>
-              <p className="text-xs text-slate-400">Catalog physical discs, cartridges, and media</p>
+              <h2 className="text-xl font-bold text-slate-900 font-display">Add to Collection</h2>
+              <p className="text-xs text-slate-500">Catalog physical discs, cartridges, and media</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white bg-surface rounded-full transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Category & Mode Selector */}
-        <div className="px-6 py-3 bg-surface border-b border-surface-border flex flex-wrap items-center justify-between gap-3">
+        <div className="px-6 py-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
           {/* Category Switch */}
-          <div className="flex items-center gap-1 bg-surface-elevated p-1 rounded-xl border border-surface-border">
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
             {[
               { id: 'movie', label: 'Movie', icon: Film },
               { id: 'tv', label: 'TV Show', icon: Tv },
@@ -191,7 +191,7 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                     setSearchResults([]);
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    active ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-slate-200'
+                    active ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -202,12 +202,12 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
           </div>
 
           {/* Mode Switch (Search vs Manual) */}
-          <div className="flex items-center gap-1 bg-surface-elevated p-1 rounded-xl border border-surface-border text-xs">
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
             <button
               type="button"
               onClick={() => setMode('search')}
               className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                mode === 'search' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'
+                mode === 'search' ? 'bg-white text-slate-900 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               🔍 Auto Lookup
@@ -216,7 +216,7 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
               type="button"
               onClick={() => setMode('manual')}
               className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                mode === 'manual' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'
+                mode === 'manual' ? 'bg-white text-slate-900 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               ✍️ Manual Entry
@@ -225,7 +225,7 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
         </div>
 
         {/* Scrollable Form Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
           
           {/* SEARCH AUTO-LOOKUP SECTION */}
           {mode === 'search' && (
@@ -237,11 +237,11 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                   placeholder={`Search ${category === 'movie' ? 'movies (e.g. Dune, Blade Runner)' : (category === 'tv' ? 'TV series (e.g. Breaking Bad)' : 'games (e.g. Zelda, Elden Ring)')}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-surface-elevated text-slate-100 pl-10 pr-10 py-2.5 rounded-xl border border-surface-border focus:border-amber-500 focus:outline-none text-sm"
+                  className="w-full bg-white text-slate-900 pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:outline-hidden text-sm shadow-xs transition-colors"
                   autoFocus
                 />
                 {isSearching && (
-                  <Loader2 className="w-4 h-4 text-amber-400 animate-spin absolute right-3.5 top-1/2 -translate-y-1/2" />
+                  <Loader2 className="w-4 h-4 text-amber-500 animate-spin absolute right-3.5 top-1/2 -translate-y-1/2" />
                 )}
               </div>
 
@@ -252,18 +252,18 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                     <div
                       key={i}
                       onClick={() => handleSelectCandidate(res)}
-                      className="group p-2 rounded-xl bg-surface-elevated border border-surface-border hover:border-amber-500 hover:shadow-lg cursor-pointer transition-all flex flex-col justify-between"
+                      className="group p-2.5 rounded-xl bg-white border border-slate-200 hover:border-amber-500 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
                     >
-                      <div className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-slate-900 mb-2">
+                      <div className="aspect-[2/3] w-full rounded-lg overflow-hidden bg-slate-100 mb-2 border border-slate-200">
                         {res.poster_url ? (
                           <img src={res.poster_url} alt={res.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-600 text-[10px]">No Cover</div>
+                          <div className="w-full h-full flex items-center justify-center text-slate-400 text-[10px]">No Cover</div>
                         )}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-200 line-clamp-1 group-hover:text-amber-400">{res.title}</p>
-                        <p className="text-[10px] text-slate-400">{res.release_year || '—'}</p>
+                        <p className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-amber-600">{res.title}</p>
+                        <p className="text-[10px] text-slate-500">{res.release_year || '—'}</p>
                       </div>
                     </div>
                   ))}
@@ -272,23 +272,23 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
 
               {/* Selected Candidate Preview Banner */}
               {selectedCandidate && (
-                <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 flex items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     {form.poster_url && (
-                      <img src={form.poster_url} alt={form.title} className="w-12 h-16 object-cover rounded-lg border border-amber-500/30" />
+                      <img src={form.poster_url} alt={form.title} className="w-12 h-16 object-cover rounded-lg border border-amber-300 shadow-xs" />
                     )}
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                      <span className="text-[10px] uppercase font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
                         Selected Title
                       </span>
-                      <h4 className="font-bold text-sm text-slate-100 mt-1">{form.title} ({form.release_year})</h4>
-                      <p className="text-xs text-slate-400">{form.creator}</p>
+                      <h4 className="font-bold text-sm text-slate-900 mt-1">{form.title} ({form.release_year})</h4>
+                      <p className="text-xs text-slate-600">{form.creator}</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedCandidate(null)}
-                    className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-surface"
+                    className="text-xs text-slate-600 hover:text-slate-900 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs transition-colors"
                   >
                     Change Title
                   </button>
@@ -302,59 +302,59 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
             
             {/* Title & Metadata fields */}
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">General Information</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">General Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-slate-400">Title *</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Title *</label>
                   <input
                     type="text"
                     placeholder="e.g. Blade Runner 2049"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full bg-surface-elevated text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Release Year</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Release Year</label>
                   <input
                     type="number"
                     placeholder="2017"
                     value={form.release_year}
                     onChange={(e) => setForm({ ...form, release_year: e.target.value })}
-                    className="w-full bg-surface-elevated text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Director / Studio / Developer</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Director / Studio / Developer</label>
                   <input
                     type="text"
                     placeholder="e.g. Denis Villeneuve"
                     value={form.creator}
                     onChange={(e) => setForm({ ...form, creator: e.target.value })}
-                    className="w-full bg-surface-elevated text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Runtime / Length</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Runtime / Length</label>
                   <input
                     type="text"
                     placeholder="e.g. 164 min or 50 hrs"
                     value={form.runtime}
                     onChange={(e) => setForm({ ...form, runtime: e.target.value })}
-                    className="w-full bg-surface-elevated text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Assign to Shelf</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Assign to Shelf</label>
                   <select
                     value={form.shelf_id}
                     onChange={(e) => setForm({ ...form, shelf_id: e.target.value })}
-                    className="w-full bg-surface-elevated text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   >
                     <option value="">None (Unsorted)</option>
                     {shelves.map((s) => (
@@ -364,34 +364,34 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                 </div>
 
                 <div className="sm:col-span-3">
-                  <label className="text-xs text-slate-400">Poster Image URL</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Poster Image URL</label>
                   <input
                     type="url"
                     placeholder="https://..."
                     value={form.poster_url}
                     onChange={(e) => setForm({ ...form, poster_url: e.target.value })}
-                    className="w-full bg-surface-elevated text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
               </div>
             </div>
 
-            {/* KOLEKINO PHYSICAL EDITION DETAILS */}
-            <div className="p-4 rounded-2xl bg-surface-elevated border border-surface-border space-y-4">
+            {/* PHYSICAL EDITION DETAILS */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
               <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-amber-400" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                <Package className="w-4 h-4 text-amber-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-700">
                   Physical Edition & Packaging Details
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs text-slate-400">Media Format *</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Media Format *</label>
                   <select
                     value={form.format}
                     onChange={(e) => setForm({ ...form, format: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   >
                     <option value="4K UHD">4K UHD</option>
                     <option value="Blu-ray">Blu-ray</option>
@@ -409,11 +409,11 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Packaging Type</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Packaging Type</label>
                   <select
                     value={form.packaging}
                     onChange={(e) => setForm({ ...form, packaging: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   >
                     <option value="Standard Case">Standard Keep Case</option>
                     <option value="Steelbook">Steelbook</option>
@@ -426,22 +426,22 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Edition Name / Label</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Edition Name / Label</label>
                   <input
                     type="text"
                     placeholder="e.g. Collector's Edition, Spine #1042"
                     value={form.edition_name}
                     onChange={(e) => setForm({ ...form, edition_name: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Condition</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Condition</label>
                   <select
                     value={form.condition}
                     onChange={(e) => setForm({ ...form, condition: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   >
                     <option value="New/Sealed">New / Sealed</option>
                     <option value="Mint">Mint</option>
@@ -452,35 +452,35 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Purchase Price ($)</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Purchase Price ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     placeholder="29.99"
                     value={form.purchase_price}
                     onChange={(e) => setForm({ ...form, purchase_price: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400">Storage / Shelf Location</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Storage / Shelf Location</label>
                   <input
                     type="text"
                     placeholder="e.g. Shelf A, Row 2"
                     value={form.storage_location}
                     onChange={(e) => setForm({ ...form, storage_location: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-xl border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden shadow-2xs transition-colors"
                   />
                 </div>
 
                 <div className="sm:col-span-3 flex items-center gap-4 pt-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 font-medium">
                     <input
                       type="checkbox"
                       checked={form.slipcover}
                       onChange={(e) => setForm({ ...form, slipcover: e.target.checked })}
-                      className="rounded bg-surface border-surface-border text-amber-500 focus:ring-0"
+                      className="rounded border-slate-300 text-amber-500 focus:ring-amber-400"
                     />
                     <span>Has Slipcover</span>
                   </label>
@@ -492,11 +492,11 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-surface-elevated border-t border-surface-border flex items-center justify-between">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs text-slate-400 hover:text-white"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
           >
             Cancel
           </button>
@@ -505,7 +505,7 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [] }) {
             form="add-item-form"
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-sm shadow-glow-gold transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-sm shadow-md transition-all"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             <span>Add to Collection</span>

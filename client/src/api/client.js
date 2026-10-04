@@ -2,13 +2,14 @@ const API_BASE = '/api';
 
 export const client = {
   getToken() {
-    return localStorage.getItem('kolekino_token');
+    return localStorage.getItem('shelfmark_token') || localStorage.getItem('kolekino_token');
   },
 
   setToken(token) {
     if (token) {
-      localStorage.setItem('kolekino_token', token);
+      localStorage.setItem('shelfmark_token', token);
     } else {
+      localStorage.removeItem('shelfmark_token');
       localStorage.removeItem('kolekino_token');
     }
   },
@@ -38,6 +39,7 @@ export const client = {
     // If 401 unauthorized, remove token
     if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
       this.setToken(null);
+      window.dispatchEvent(new CustomEvent('shelfmark_auth_expired'));
       window.dispatchEvent(new CustomEvent('kolekino_auth_expired'));
     }
 

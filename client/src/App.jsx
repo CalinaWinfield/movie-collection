@@ -136,9 +136,9 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090b10] text-slate-100 flex flex-col selection:bg-amber-500/30">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-amber-500/20">
       
-      {/* Top Kolekino Navigation */}
+      {/* Top Navigation */}
       <Navbar
         currentCategory={currentCategory}
         setCurrentCategory={setCurrentCategory}
@@ -152,26 +152,26 @@ export function App() {
         onOpenBackupModal={() => setIsBackupModalOpen(true)}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Main Container - WIDER BODY */}
+      <main className="flex-1 max-w-[1750px] w-full mx-auto px-4 sm:px-8 lg:px-12 py-8 space-y-6">
         
-        {/* Active Shelf or Filter Banner */}
+        {/* Active Shelf Filter Banner */}
         {selectedShelf && (
-          <div className="p-4 rounded-2xl bg-surface-elevated border border-surface-border flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div 
-                className="w-3.5 h-8 rounded-full" 
+                className="w-3.5 h-8 rounded-full shadow-xs" 
                 style={{ backgroundColor: selectedShelf.color || '#f59e0b' }} 
               />
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400">SHELF FILTER</span>
-                <h2 className="text-lg font-bold text-slate-100">{selectedShelf.name}</h2>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-600">SHELF FILTER</span>
+                <h2 className="text-lg font-bold text-slate-900">{selectedShelf.name}</h2>
               </div>
             </div>
 
             <button
               onClick={() => setSelectedShelfId(null)}
-              className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-surface border border-surface-border"
+              className="text-xs font-semibold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
             >
               Clear Shelf Filter ✕
             </button>
@@ -179,16 +179,16 @@ export function App() {
         )}
 
         {/* Filters Toolbar */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-2 border-b border-surface-border/60">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-2 border-b border-slate-200">
           
           {/* Format & Status Pills */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* Format filter pills */}
-            <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-surface-border overflow-x-auto max-w-full">
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs overflow-x-auto max-w-full">
               <button
                 onClick={() => setSelectedFormat('all')}
-                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
-                  selectedFormat === 'all' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+                className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                  selectedFormat === 'all' ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 All Formats
@@ -197,8 +197,8 @@ export function App() {
                 <button
                   key={fmt}
                   onClick={() => setSelectedFormat(selectedFormat === fmt ? 'all' : fmt)}
-                  className={`text-xs px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all ${
-                    selectedFormat === fmt ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
+                    selectedFormat === fmt ? 'bg-amber-500 text-slate-950 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   {fmt}
@@ -207,7 +207,7 @@ export function App() {
             </div>
 
             {/* Status pills */}
-            <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-surface-border">
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
               {[
                 { id: 'all', label: 'All Status' },
                 { id: 'owned', label: 'Owned' },
@@ -218,8 +218,8 @@ export function App() {
                 <button
                   key={st.id}
                   onClick={() => setSelectedStatus(st.id)}
-                  className={`text-xs px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all ${
-                    selectedStatus === st.id ? 'bg-surface-elevated text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
+                    selectedStatus === st.id ? 'bg-amber-50 text-amber-700 font-bold border border-amber-200/60 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {st.label}
@@ -230,16 +230,16 @@ export function App() {
 
           {/* Sort & Count */}
           <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
-            <span className="text-xs text-slate-400">
-              <strong className="text-slate-200">{items.length}</strong> {items.length === 1 ? 'title' : 'titles'}
+            <span className="text-xs text-slate-500 font-medium">
+              <strong className="text-slate-900 font-bold">{items.length}</strong> {items.length === 1 ? 'title' : 'titles'}
             </span>
 
-            <div className="flex items-center gap-1.5 bg-surface px-2.5 py-1.5 rounded-xl border border-surface-border text-xs text-slate-300">
+            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-700 shadow-xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-slate-200 focus:outline-none cursor-pointer text-xs"
+                className="bg-transparent text-slate-800 font-medium focus:outline-none cursor-pointer text-xs"
               >
                 <option value="recent">Recently Added</option>
                 <option value="title_asc">Title (A to Z)</option>
@@ -261,14 +261,14 @@ export function App() {
           />
         ) : null}
 
-        {/* Poster Grid */}
+        {/* Poster Grid - WIDER SCREEN RESPONSIVE */}
         {loadingData ? (
           <div className="py-24 text-center">
             <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-3" />
-            <p className="text-sm text-slate-400">Loading your collection...</p>
+            <p className="text-sm text-slate-500 font-medium">Loading your collection...</p>
           </div>
         ) : items.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-5 sm:gap-6">
             {items.map((item) => (
               <ItemCard
                 key={item.id}
@@ -281,17 +281,17 @@ export function App() {
         ) : (
           /* Empty state */
           <div className="py-20 text-center max-w-md mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-surface-elevated border border-surface-border flex items-center justify-center mx-auto text-amber-500/70">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mx-auto text-amber-500">
               <Film className="w-8 h-8" />
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-slate-100 font-display">
+              <h3 className="text-lg font-bold text-slate-900 font-display">
                 {searchQuery || selectedFormat !== 'all' || selectedStatus !== 'all' || selectedShelfId
                   ? 'No matching titles found'
                   : 'Your collection is empty'}
               </h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 {searchQuery || selectedFormat !== 'all' || selectedStatus !== 'all' || selectedShelfId
                   ? 'Try clearing your filters or searching for another title.'
                   : 'Start tracking your 4K UHD discs, Blu-rays, Steelbooks, TV series box sets, and video games.'}
@@ -301,7 +301,7 @@ export function App() {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-glow-gold transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm transition-all"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Add Your First Title</span>
@@ -309,9 +309,9 @@ export function App() {
 
               <button
                 onClick={() => setIsBackupModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-elevated hover:bg-slate-800 border border-surface-border text-slate-300 font-semibold text-xs transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs shadow-xs transition-all"
               >
-                <Sparkles className="w-4 h-4 text-amber-400" />
+                <Sparkles className="w-4 h-4 text-amber-500" />
                 <span>Load Sample Collection</span>
               </button>
             </div>

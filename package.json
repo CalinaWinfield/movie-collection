@@ -1,7 +1,7 @@
 {
-  "name": "kolekino-media-collection",
+  "name": "shelfmark-media-collection",
   "version": "1.0.0",
-  "description": "Kolekino-style physical & digital media collection tracker for movies, TV shows, and games.",
+  "description": "Shelfmark — physical & digital media collection tracker for movies, TV shows, and games.",
   "scripts": {
     "start": "node server/index.js",
     "server": "node server/index.js",
@@ -12,7 +12,7 @@
   "keywords": [
     "movie-collection",
     "physical-media",
-    "kolekino",
+    "shelfmark",
     "4k-uhd",
     "bluray",
     "steelbook",

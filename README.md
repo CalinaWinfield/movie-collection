@@ -1,10 +1,10 @@
-# 🎬 Kolekino — Physical & Media Collection Tracker
+# 🎬 Shelfmark — Physical & Media Collection Tracker
 
-A modern, cinematic media tracking web application inspired by **[Kolekino](https://kolekino.app)**. Designed specifically for collectors who love physical media (4K Ultra HD discs, Steelbooks, Criterion Collection, Blu-rays, DVDs, TV box sets) and video games (Nintendo Switch cartridges, PS5 discs, Xbox, PC/Steam).
+A modern, clean, light-themed media tracking web application designed specifically for collectors who love physical media (4K Ultra HD discs, Steelbooks, Criterion Collection, Blu-rays, DVDs, TV box sets) and video games (Nintendo Switch cartridges, PS5 discs, Xbox, PC/Steam).
 
 ---
 
-## ✨ Key Kolekino-Inspired Features
+## ✨ Key Features
 
 ### 1. 💽 Edition-Level Tracking ("Media First, Editions Second")
 - Catalog multiple physical & digital editions under a single title (e.g. A *4K UHD Steelbook* and a *Criterion Remastered Digipak* for the same movie).

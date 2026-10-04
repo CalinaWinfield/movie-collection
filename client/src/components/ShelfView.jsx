@@ -80,7 +80,7 @@ export function ShelfView({ items, onItemClick }) {
   return (
     <div className="w-full my-6">
       <div className="flex items-center justify-between mb-3 px-2">
-        <h3 className="text-sm font-semibold tracking-wider uppercase text-slate-400 flex items-center gap-2">
+        <h3 className="text-sm font-bold tracking-wider uppercase text-slate-700 flex items-center gap-2">
           <span>📚 Physical Shelf View</span>
           <span className="text-xs text-slate-500 font-normal">({items.length} titles on display)</span>
         </h3>
@@ -89,7 +89,7 @@ export function ShelfView({ items, onItemClick }) {
         </span>
       </div>
 
-      <div className="relative p-6 pt-10 rounded-2xl bg-[#0d1017] border border-surface-border overflow-hidden">
+      <div className="relative p-6 pt-10 rounded-2xl bg-stone-100/90 border border-stone-200/90 shadow-sm overflow-hidden">
         {/* Bookcase Wooden Shelf Board Base */}
         <div className="absolute inset-x-0 bottom-4 h-5 shelf-board z-0" />
 

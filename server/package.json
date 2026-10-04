@@ -1,7 +1,7 @@
 {
   "name": "movie-collection-server",
   "version": "1.0.0",
-  "description": "Backend API for Kolekino-style media collection tracker",
+  "description": "Backend API for Shelfmark physical & media collection tracker",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

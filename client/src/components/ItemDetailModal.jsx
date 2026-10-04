@@ -120,27 +120,27 @@ export function ItemDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
       <div 
-        className="relative w-full max-w-4xl bg-surface rounded-3xl border border-surface-border shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-4xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header / Backdrop area */}
-        <div className="relative bg-slate-900 border-b border-surface-border">
+        <div className="relative bg-slate-900 border-b border-slate-800">
           {item.backdrop_url && (
             <div 
-              className="absolute inset-0 bg-cover bg-center opacity-20 blur-md pointer-events-none"
+              className="absolute inset-0 bg-cover bg-center opacity-25 blur-md pointer-events-none"
               style={{ backgroundImage: `url(${item.backdrop_url})` }}
             />
           )}
 
           <div className="relative p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
             {/* Poster Thumbnail */}
-            <div className="w-32 sm:w-44 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden bg-slate-950 border-2 border-surface-border shadow-xl case-sheen">
+            <div className="w-32 sm:w-44 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-700/60 shadow-xl case-sheen">
               {item.poster_url ? (
                 <img src={item.poster_url} alt={item.title} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
                   <CategoryIcon className="w-10 h-10 mb-2" />
                   <span className="text-xs">No Cover</span>
                 </div>
@@ -170,20 +170,20 @@ export function ItemDetailModal({
 
                   <button
                     onClick={onClose}
-                    className="p-2 text-slate-400 hover:text-white bg-surface-elevated hover:bg-slate-800 rounded-full transition-colors"
+                    className="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-full transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 mt-2 font-display">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mt-2 font-display">
                   {item.title}
                 </h1>
 
                 {item.creator && (
                   <p className="text-sm text-slate-300 mt-1 font-medium">
                     {item.category === 'movie' ? 'Directed by ' : (item.category === 'tv' ? 'Created by ' : 'Developer: ')}
-                    <span className="text-slate-100">{item.creator}</span>
+                    <span className="text-white font-semibold">{item.creator}</span>
                   </p>
                 )}
 
@@ -199,9 +199,9 @@ export function ItemDetailModal({
               </div>
 
               {/* Status and Rating controls */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-surface-border/60">
+              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-800">
                 {/* Status selector */}
-                <div className="flex items-center gap-1 bg-surface-elevated p-1 rounded-xl border border-surface-border">
+                <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
                   {[
                     { id: 'owned', label: 'Owned' },
                     { id: 'in_progress', label: 'Playing/Watching' },
@@ -248,15 +248,15 @@ export function ItemDetailModal({
           </div>
         </div>
 
-        {/* Kolekino Navigation Tabs */}
-        <div className="flex items-center justify-between px-6 bg-surface-elevated border-b border-surface-border">
+        {/* Shelfmark Navigation Tabs */}
+        <div className="flex items-center justify-between px-6 bg-slate-50 border-b border-slate-200">
           <div className="flex items-center space-x-6">
             <button
               onClick={() => setActiveTab('editions')}
               className={`py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === 'editions'
-                  ? 'border-amber-500 text-amber-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  ? 'border-amber-600 text-amber-800'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
               <Package className="w-4 h-4" />
@@ -267,8 +267,8 @@ export function ItemDetailModal({
               onClick={() => setActiveTab('notes')}
               className={`py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === 'notes'
-                  ? 'border-amber-500 text-amber-400'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  ? 'border-amber-600 text-amber-800'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
               <Tag className="w-4 h-4" />
@@ -279,7 +279,7 @@ export function ItemDetailModal({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEditingItem(!isEditingItem)}
-              className="text-xs text-slate-300 hover:text-white bg-surface hover:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-surface-border flex items-center gap-1.5"
+              className="text-xs text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition-colors"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>{isEditingItem ? 'Cancel Edit' : 'Edit Item'}</span>
@@ -287,7 +287,7 @@ export function ItemDetailModal({
 
             <button
               onClick={() => onDeleteItem(item.id)}
-              className="text-xs text-red-400 hover:text-red-300 bg-surface hover:bg-red-950/40 px-2.5 py-1.5 rounded-lg border border-red-900/40 flex items-center gap-1.5"
+              className="text-xs text-red-600 hover:text-red-700 bg-white hover:bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-200 flex items-center gap-1.5 shadow-xs transition-colors"
               title="Delete from collection"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -296,47 +296,47 @@ export function ItemDetailModal({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/60">
           
           {/* Edit Item Form if toggled */}
           {isEditingItem && (
-            <form onSubmit={handleSaveItemEdit} className="p-5 rounded-2xl bg-surface-elevated border border-surface-border space-y-4">
-              <h3 className="font-semibold text-slate-200 text-sm">Edit Title Information</h3>
+            <form onSubmit={handleSaveItemEdit} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+              <h3 className="font-semibold text-slate-800 text-sm">Edit Title Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-slate-400">Title</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Title</label>
                   <input
                     type="text"
                     value={editForm.title}
                     onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Release Year</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Release Year</label>
                   <input
                     type="number"
                     value={editForm.release_year}
                     onChange={(e) => setEditForm({ ...editForm, release_year: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Creator / Director / Developer</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Creator / Director / Developer</label>
                   <input
                     type="text"
                     value={editForm.creator}
                     onChange={(e) => setEditForm({ ...editForm, creator: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Assign to Shelf</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Assign to Shelf</label>
                   <select
                     value={editForm.shelf_id}
                     onChange={(e) => setEditForm({ ...editForm, shelf_id: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                   >
                     <option value="">None (Unsorted)</option>
                     {shelves.map((s) => (
@@ -345,21 +345,21 @@ export function ItemDetailModal({
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-slate-400">Poster Image URL</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Poster Image URL</label>
                   <input
                     type="url"
                     value={editForm.poster_url}
                     onChange={(e) => setEditForm({ ...editForm, poster_url: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-slate-400">Synopsis</label>
+                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Synopsis</label>
                   <textarea
                     rows={3}
                     value={editForm.synopsis}
                     onChange={(e) => setEditForm({ ...editForm, synopsis: e.target.value })}
-                    className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                   />
                 </div>
               </div>
@@ -367,14 +367,14 @@ export function ItemDetailModal({
                 <button
                   type="button"
                   onClick={() => setIsEditingItem(false)}
-                  className="px-4 py-2 text-xs text-slate-300 hover:bg-surface rounded-lg"
+                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-xs transition-colors"
                 >
                   Save Changes
                 </button>
@@ -387,12 +387,12 @@ export function ItemDetailModal({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-slate-100 text-sm">Physical & Digital Editions</h3>
-                  <p className="text-xs text-slate-400">Track separate formats, slipcovers, and purchase records for this title</p>
+                  <h3 className="font-semibold text-slate-800 text-sm">Physical & Digital Editions</h3>
+                  <p className="text-xs text-slate-500">Track separate formats, slipcovers, and purchase records for this title</p>
                 </div>
                 <button
                   onClick={() => setIsAddingEdition(!isAddingEdition)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/30 text-xs font-semibold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold shadow-xs transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Another Edition</span>
@@ -401,15 +401,15 @@ export function ItemDetailModal({
 
               {/* Add Edition Form */}
               {isAddingEdition && (
-                <form onSubmit={handleAddEdition} className="p-5 rounded-2xl bg-surface-elevated border border-amber-500/30 space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">New Edition Details</h4>
+                <form onSubmit={handleAddEdition} className="p-5 rounded-2xl bg-white border border-amber-300 shadow-xs space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700">New Edition Details</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="text-xs text-slate-400">Format</label>
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Format</label>
                       <select
                         value={newEdition.format}
                         onChange={(e) => setNewEdition({ ...newEdition, format: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                       >
                         <option value="4K UHD">4K UHD</option>
                         <option value="Blu-ray">Blu-ray</option>
@@ -427,22 +427,22 @@ export function ItemDetailModal({
                     </div>
 
                     <div>
-                      <label className="text-xs text-slate-400">Edition Name / Label</label>
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Edition Name / Label</label>
                       <input
                         type="text"
                         placeholder="e.g. Collector's Edition, Spine #102"
                         value={newEdition.edition_name}
                         onChange={(e) => setNewEdition({ ...newEdition, edition_name: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs text-slate-400">Packaging Type</label>
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Packaging Type</label>
                       <select
                         value={newEdition.packaging}
                         onChange={(e) => setNewEdition({ ...newEdition, packaging: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                       >
                         <option value="Standard Case">Standard Keep Case</option>
                         <option value="Steelbook">Steelbook</option>
@@ -455,11 +455,11 @@ export function ItemDetailModal({
                     </div>
 
                     <div>
-                      <label className="text-xs text-slate-400">Condition</label>
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Condition</label>
                       <select
                         value={newEdition.condition}
                         onChange={(e) => setNewEdition({ ...newEdition, condition: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                       >
                         <option value="New/Sealed">New / Sealed</option>
                         <option value="Mint">Mint</option>
@@ -470,35 +470,35 @@ export function ItemDetailModal({
                     </div>
 
                     <div>
-                      <label className="text-xs text-slate-400">Purchase Price ($)</label>
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Purchase Price ($)</label>
                       <input
                         type="number"
                         step="0.01"
                         placeholder="29.99"
                         value={newEdition.purchase_price}
                         onChange={(e) => setNewEdition({ ...newEdition, purchase_price: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs text-slate-400">Storage / Shelf Location</label>
+                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Storage / Shelf Location</label>
                       <input
                         type="text"
                         placeholder="e.g. Living Room Shelf A"
                         value={newEdition.storage_location}
                         onChange={(e) => setNewEdition({ ...newEdition, storage_location: e.target.value })}
-                        className="w-full bg-surface text-slate-100 px-3 py-2 rounded-lg border border-surface-border text-sm"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
                       />
                     </div>
 
                     <div className="flex items-center gap-3 pt-4">
-                      <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 font-medium">
                         <input
                           type="checkbox"
                           checked={newEdition.slipcover}
                           onChange={(e) => setNewEdition({ ...newEdition, slipcover: e.target.checked })}
-                          className="rounded bg-surface border-surface-border text-amber-500 focus:ring-0"
+                          className="rounded border-slate-300 text-amber-500 focus:ring-amber-400"
                         />
                         <span>Includes Slipcover</span>
                       </label>
@@ -509,14 +509,14 @@ export function ItemDetailModal({
                     <button
                       type="button"
                       onClick={() => setIsAddingEdition(false)}
-                      className="px-4 py-2 text-xs text-slate-300 hover:bg-surface rounded-lg"
+                      className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg"
+                      className="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-xs transition-colors"
                     >
                       Save Edition
                     </button>
@@ -530,7 +530,7 @@ export function ItemDetailModal({
                   item.editions.map((ed) => (
                     <div 
                       key={ed.id}
-                      className="p-4 rounded-2xl bg-surface-elevated border border-surface-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                      className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-300 transition-colors"
                     >
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -540,23 +540,23 @@ export function ItemDetailModal({
                             slipcover={ed.slipcover}
                             size="md"
                           />
-                          <span className="font-semibold text-slate-200 text-sm">
+                          <span className="font-semibold text-slate-800 text-sm">
                             {ed.edition_name || 'Standard Edition'}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
-                          {ed.condition && <span>Condition: <strong className="text-slate-300">{ed.condition}</strong></span>}
+                        <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                          {ed.condition && <span>Condition: <strong className="text-slate-700 font-semibold">{ed.condition}</strong></span>}
                           {ed.region && <span>• {ed.region}</span>}
                           {ed.disc_count > 1 && <span>• {ed.disc_count} Discs</span>}
                           {ed.storage_location && (
-                            <span className="flex items-center gap-1 text-slate-300">
-                              <MapPin className="w-3 h-3 text-amber-400" />
+                            <span className="flex items-center gap-1 text-slate-700 font-medium">
+                              <MapPin className="w-3 h-3 text-amber-500" />
                               {ed.storage_location}
                             </span>
                           )}
                           {ed.purchase_price > 0 && (
-                            <span className="text-emerald-400 font-semibold">
+                            <span className="text-emerald-600 font-semibold">
                               ${Number(ed.purchase_price).toFixed(2)}
                             </span>
                           )}
@@ -567,7 +567,7 @@ export function ItemDetailModal({
                         {item.editions.length > 1 && (
                           <button
                             onClick={() => handleDeleteEdition(ed.id)}
-                            className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-slate-800"
+                            className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
                             title="Remove edition"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -577,7 +577,7 @@ export function ItemDetailModal({
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-slate-500 italic">No editions listed yet.</p>
+                  <p className="text-xs text-slate-400 italic">No editions listed yet.</p>
                 )}
               </div>
             </div>
@@ -587,29 +587,29 @@ export function ItemDetailModal({
           {activeTab === 'notes' && (
             <div className="space-y-4">
               <div>
-                <h4 className="text-xs font-semibold text-slate-400 mb-1">Synopsis</h4>
-                <p className="text-sm text-slate-200 leading-relaxed bg-surface p-4 rounded-xl border border-surface-border">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Synopsis</h4>
+                <p className="text-sm text-slate-700 leading-relaxed bg-white p-4 rounded-xl border border-slate-200/90 shadow-xs">
                   {item.synopsis || 'No synopsis provided.'}
                 </p>
               </div>
 
               <div>
-                <h4 className="text-xs font-semibold text-slate-400 mb-1">Collector's Personal Notes</h4>
-                <div className="p-4 rounded-xl bg-surface border border-surface-border text-sm text-slate-300">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Collector's Personal Notes</h4>
+                <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-xs text-sm text-slate-700">
                   {item.user_notes ? (
                     <p className="whitespace-pre-line">{item.user_notes}</p>
                   ) : (
-                    <p className="text-slate-500 italic">No notes added. Click "Edit Item" above to add personal viewing notes or special packaging comments.</p>
+                    <p className="text-slate-400 italic">No notes added. Click "Edit Item" above to add personal viewing notes or special packaging comments.</p>
                   )}
                 </div>
               </div>
 
               {item.tags && item.tags.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 mb-2">Tags</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Tags</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {item.tags.map((t, idx) => (
-                      <span key={idx} className="text-xs bg-surface-elevated text-amber-300 border border-amber-500/20 px-2.5 py-1 rounded-md">
+                      <span key={idx} className="text-xs bg-amber-50 text-amber-800 border border-amber-200 font-medium px-2.5 py-1 rounded-md shadow-2xs">
                         #{t}
                       </span>
                     ))}

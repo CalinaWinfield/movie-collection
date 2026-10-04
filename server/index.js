@@ -31,7 +31,7 @@ app.use('/api/public', publicRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', name: 'Kolekino Media Collection API', time: new Date().toISOString() });
+  res.json({ status: 'ok', name: 'Shelfmark Media Collection API', time: new Date().toISOString() });
 });
 
 // Serve frontend build if exists
@@ -301,7 +301,7 @@ async function startServer() {
   await ensureDemoData();
 
   app.listen(PORT, () => {
-    console.log(`🎬 Kolekino Media API Server running on http://localhost:${PORT}`);
+    console.log(`🎬 Shelfmark Media API Server running on http://localhost:${PORT}`);
   });
 }
 

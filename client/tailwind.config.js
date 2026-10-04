@@ -7,10 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#090b10',
-        surface: '#11151f',
-        'surface-elevated': '#181e2b',
-        'surface-border': '#222a3d',
+        background: '#f8fafc',
+        surface: '#ffffff',
+        'surface-elevated': '#f1f5f9',
+        'surface-border': '#e2e8f0',
         brand: {
           50: '#fffbeb',
           100: '#fef3c7',
@@ -36,10 +36,8 @@ export default {
         display: ['Cinzel', 'Inter', 'serif']
       },
       boxShadow: {
-        'glow-gold': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
-        'glow-blue': '0 0 25px -5px rgba(37, 99, 235, 0.35)',
-        'glow-red': '0 0 25px -5px rgba(239, 68, 68, 0.35)',
-        'case': '2px 4px 12px rgba(0, 0, 0, 0.6), inset -1px 0 2px rgba(255, 255, 255, 0.15)',
+        'glow-gold': '0 4px 20px -2px rgba(245, 158, 11, 0.25)',
+        'case': '2px 4px 12px rgba(0, 0, 0, 0.45), inset -1px 0 2px rgba(255, 255, 255, 0.25)',
       }
     },
   },

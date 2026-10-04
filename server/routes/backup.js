@@ -27,7 +27,7 @@ router.get('/export/json', requireAuth, (req, res) => {
     editions
   };
 
-  res.setHeader('Content-Disposition', `attachment; filename="kolekino_backup_${user?.username || 'collection'}.json"`);
+  res.setHeader('Content-Disposition', `attachment; filename="shelfmark_backup_${user?.username || 'collection'}.json"`);
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(exportData, null, 2));
 });

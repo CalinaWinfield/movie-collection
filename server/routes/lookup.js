@@ -35,7 +35,7 @@ router.get('/search', async (req, res) => {
 async function searchTVMaze(query) {
   try {
     const url = `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`;
-    const response = await fetch(url, { headers: { 'User-Agent': 'KolekinoMediaTracker/1.0' } });
+    const response = await fetch(url, { headers: { 'User-Agent': 'ShelfmarkMediaTracker/1.0' } });
     if (!response.ok) return [];
 
     const data = await response.json();
@@ -69,7 +69,7 @@ async function searchWikipediaMedia(query, typeKeyword) {
     // 1. Search Wikipedia articles
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query + ' ' + typeKeyword)}&limit=6&namespace=0&format=json`;
     const searchRes = await fetch(searchUrl, {
-      headers: { 'User-Agent': 'KolekinoMediaTracker/1.0 (contact: info@kolekino-personal.app)' }
+      headers: { 'User-Agent': 'ShelfmarkMediaTracker/1.0 (contact: info@shelfmark.app)' }
     });
     if (!searchRes.ok) return [];
 
@@ -84,7 +84,7 @@ async function searchWikipediaMedia(query, typeKeyword) {
         const slug = encodeURIComponent(title.replace(/ /g, '_'));
         const sumUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`;
         const sumRes = await fetch(sumUrl, {
-          headers: { 'User-Agent': 'KolekinoMediaTracker/1.0' }
+          headers: { 'User-Agent': 'ShelfmarkMediaTracker/1.0' }
         });
         if (!sumRes.ok) return null;
         const sumData = await sumRes.json();
