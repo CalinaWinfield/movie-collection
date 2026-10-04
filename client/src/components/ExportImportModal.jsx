@@ -62,11 +62,11 @@ export function ExportImportModal({ isOpen, onClose, onRefresh }) {
         {/* Header */}
         <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+            <div className="w-10 h-10 rounded-xl bg-forest-500/10 border border-forest-500/20 flex items-center justify-center text-forest-600">
               <Download className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 font-display">Backup & Library Tools</h2>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Backup & Library Tools</h2>
               <p className="text-xs text-slate-500">Export, import, or load sample collections</p>
             </div>
           </div>
@@ -93,8 +93,8 @@ export function ExportImportModal({ isOpen, onClose, onRefresh }) {
           )}
 
           {/* Quick Seed Starter Curated Library */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/60 border border-amber-200 space-y-2">
-            <div className="flex items-center gap-2 text-amber-800">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-forest-50 to-forest-100/60 border border-forest-200 space-y-2">
+          <div className="flex items-center gap-2 text-forest-800">
               <Sparkles className="w-4 h-4" />
               <h3 className="text-sm font-bold text-slate-900">Curated Starter Collection</h3>
             </div>
@@ -104,7 +104,7 @@ export function ExportImportModal({ isOpen, onClose, onRefresh }) {
             <button
               onClick={handleSeedSample}
               disabled={loading}
-              className="mt-2 w-full py-2 px-3 text-xs font-semibold rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-xs transition-all"
+              className="mt-2 w-full py-2 px-3 text-xs font-semibold rounded-xl bg-forest-600 hover:bg-forest-700 text-white font-bold shadow-xs transition-all"
             >
               {loading ? 'Adding sample titles...' : 'Load Curated Sample Library'}
             </button>
@@ -116,9 +116,9 @@ export function ExportImportModal({ isOpen, onClose, onRefresh }) {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleExportJson}
-                className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-amber-400 hover:bg-white flex items-center gap-2.5 text-left shadow-2xs transition-all"
+                className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-forest-500 hover:bg-white flex items-center gap-2.5 text-left shadow-2xs transition-all"
               >
-                <FileCode className="w-5 h-5 text-amber-500 shrink-0" />
+                <FileCode className="w-5 h-5 text-forest-600 shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-slate-900 block">JSON Export</span>
                   <span className="text-[10px] text-slate-500 block">Full database backup</span>
@@ -127,7 +127,7 @@ export function ExportImportModal({ isOpen, onClose, onRefresh }) {
 
               <button
                 onClick={handleExportCsv}
-                className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-amber-400 hover:bg-white flex items-center gap-2.5 text-left shadow-2xs transition-all"
+                className="p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-forest-500 hover:bg-white flex items-center gap-2.5 text-left shadow-2xs transition-all"
               >
                 <FileText className="w-5 h-5 text-emerald-600 shrink-0" />
                 <div>
@@ -141,7 +141,7 @@ export function ExportImportModal({ isOpen, onClose, onRefresh }) {
           {/* Import JSON */}
           <div className="space-y-2.5 pt-2 border-t border-slate-200">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Import Backup</h3>
-            <label className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl bg-slate-50 cursor-pointer transition-colors text-center">
+            <label className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-slate-300 hover:border-forest-600 rounded-2xl bg-slate-50 cursor-pointer transition-colors text-center">
               <Upload className="w-6 h-6 text-slate-400 mb-1.5" />
               <span className="text-xs font-semibold text-slate-700">Click to upload Shelfmark JSON backup</span>
               <span className="text-[10px] text-slate-500 mt-0.5">Supports full .json collection exports</span>

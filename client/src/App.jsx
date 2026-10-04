@@ -24,7 +24,8 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShelfId, setSelectedShelfId] = useState(null);
   const [selectedFormat, setSelectedFormat] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedOwnership, setSelectedOwnership] = useState('all');
+  const [selectedProgress, setSelectedProgress] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'shelf'
 
@@ -49,7 +50,8 @@ export function App() {
         category: currentCategory,
         shelf_id: selectedShelfId || undefined,
         format: selectedFormat !== 'all' ? selectedFormat : undefined,
-        status: selectedStatus !== 'all' ? selectedStatus : undefined,
+        ownership_status: selectedOwnership !== 'all' ? selectedOwnership : undefined,
+        progress_status: selectedProgress !== 'all' ? selectedProgress : undefined,
         search: searchQuery || undefined,
         sort: sortBy
       };
@@ -61,7 +63,7 @@ export function App() {
     } finally {
       setLoadingData(false);
     }
-  }, [user, currentCategory, selectedShelfId, selectedFormat, selectedStatus, searchQuery, sortBy]);
+  }, [user, currentCategory, selectedShelfId, selectedFormat, selectedOwnership, selectedProgress, searchQuery, sortBy]);
 
   // Load shelves
   const fetchShelves = useCallback(async () => {
@@ -114,7 +116,7 @@ export function App() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500 mb-2" />
+        <Loader2 className="w-8 h-8 animate-spin text-forest-600 mb-2" />
       </div>
     );
   }
@@ -136,7 +138,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-amber-500/20">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-forest-600/20">
       
       {/* Top Navigation */}
       <Navbar
@@ -161,10 +163,10 @@ export function App() {
             <div className="flex items-center gap-3">
               <div 
                 className="w-3.5 h-8 rounded-full shadow-xs" 
-                style={{ backgroundColor: selectedShelf.color || '#f59e0b' }} 
+                style={{ backgroundColor: selectedShelf.color || '#2d6a4f' }} 
               />
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-600">SHELF FILTER</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-forest-700">SHELF FILTER</span>
                 <h2 className="text-lg font-bold text-slate-900">{selectedShelf.name}</h2>
               </div>
             </div>
@@ -188,7 +190,7 @@ export function App() {
               <button
                 onClick={() => setSelectedFormat('all')}
                 className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all ${
-                  selectedFormat === 'all' ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  selectedFormat === 'all' ? 'bg-forest-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 All Formats
@@ -198,7 +200,7 @@ export function App() {
                   key={fmt}
                   onClick={() => setSelectedFormat(selectedFormat === fmt ? 'all' : fmt)}
                   className={`text-xs px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
-                    selectedFormat === fmt ? 'bg-amber-500 text-slate-950 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    selectedFormat === fmt ? 'bg-forest-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   {fmt}
@@ -206,23 +208,48 @@ export function App() {
               ))}
             </div>
 
-            {/* Status pills */}
+            {/* Possession filter pills */}
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
+              <span className="text-[10px] uppercase font-bold text-slate-400 px-1.5 hidden sm:inline">Possession:</span>
               {[
-                { id: 'all', label: 'All Status' },
+                { id: 'all', label: 'All' },
                 { id: 'owned', label: 'Owned' },
-                { id: 'in_progress', label: 'In Progress' },
-                { id: 'completed', label: 'Completed' },
+                { id: 'borrowed', label: 'Borrowed' },
                 { id: 'wishlist', label: 'Wishlist' },
               ].map((st) => (
                 <button
                   key={st.id}
-                  onClick={() => setSelectedStatus(st.id)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
-                    selectedStatus === st.id ? 'bg-amber-50 text-amber-700 font-bold border border-amber-200/60 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  onClick={() => setSelectedOwnership(st.id)}
+                  className={`text-xs px-2.5 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
+                    selectedOwnership === st.id 
+                      ? 'bg-forest-100 text-forest-900 font-bold border border-forest-300/80 shadow-2xs' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   {st.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Progress filter pills */}
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
+              <span className="text-[10px] uppercase font-bold text-slate-400 px-1.5 hidden sm:inline">Progress:</span>
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'not_started', label: 'Backlog' },
+                { id: 'in_progress', label: 'In Progress' },
+                { id: 'completed', label: 'Completed' },
+              ].map((pg) => (
+                <button
+                  key={pg.id}
+                  onClick={() => setSelectedProgress(pg.id)}
+                  className={`text-xs px-2.5 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
+                    selectedProgress === pg.id 
+                      ? 'bg-blue-100 text-blue-900 font-bold border border-blue-300/80 shadow-2xs' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+                >
+                  {pg.label}
                 </button>
               ))}
             </div>
@@ -264,7 +291,7 @@ export function App() {
         {/* Poster Grid - WIDER SCREEN RESPONSIVE */}
         {loadingData ? (
           <div className="py-24 text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-3" />
+            <Loader2 className="w-8 h-8 animate-spin text-forest-600 mx-auto mb-3" />
             <p className="text-sm text-slate-500 font-medium">Loading your collection...</p>
           </div>
         ) : items.length > 0 ? (
@@ -281,18 +308,18 @@ export function App() {
         ) : (
           /* Empty state */
           <div className="py-20 text-center max-w-md mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mx-auto text-amber-500">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mx-auto text-forest-600">
               <Film className="w-8 h-8" />
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-slate-900 font-display">
-                {searchQuery || selectedFormat !== 'all' || selectedStatus !== 'all' || selectedShelfId
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                {searchQuery || selectedFormat !== 'all' || selectedOwnership !== 'all' || selectedProgress !== 'all' || selectedShelfId
                   ? 'No matching titles found'
                   : 'Your collection is empty'}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                {searchQuery || selectedFormat !== 'all' || selectedStatus !== 'all' || selectedShelfId
+                {searchQuery || selectedFormat !== 'all' || selectedOwnership !== 'all' || selectedProgress !== 'all' || selectedShelfId
                   ? 'Try clearing your filters or searching for another title.'
                   : 'Start tracking your 4K UHD discs, Blu-rays, Steelbooks, TV series box sets, and video games.'}
               </p>
@@ -301,7 +328,7 @@ export function App() {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-forest-600 hover:bg-forest-700 text-white font-bold text-xs shadow-sm transition-all"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Add Your First Title</span>
@@ -311,7 +338,7 @@ export function App() {
                 onClick={() => setIsBackupModalOpen(true)}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs shadow-xs transition-all"
               >
-                <Sparkles className="w-4 h-4 text-amber-500" />
+                <Sparkles className="w-4 h-4 text-forest-600" />
                 <span>Load Sample Collection</span>
               </button>
             </div>
@@ -335,6 +362,7 @@ export function App() {
       <AddItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        initialCategory={currentCategory !== 'all' ? currentCategory : 'movie'}
         onCreated={() => {
           fetchItems();
           fetchShelves();

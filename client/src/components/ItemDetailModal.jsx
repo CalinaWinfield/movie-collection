@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, Star, Heart, Calendar, Clock, Film, Tv, Gamepad2, 
   Plus, Trash2, Edit3, Check, DollarSign, Tag,
-  Barcode, MapPin, Package, ShieldCheck, ExternalLink
+  Barcode, MapPin, Package, ShieldCheck, ExternalLink, Loader2
 } from 'lucide-react';
 import { FormatBadge } from './FormatBadge';
 import { client } from '../api/client';
+import { 
+  getFormatsForCategory, 
+  DEFAULT_FORMAT_BY_CATEGORY 
+} from '../constants/formats';
 
 export function ItemDetailModal({ 
   item, 
@@ -15,56 +19,136 @@ export function ItemDetailModal({
   shelves = [],
   onRefreshData 
 }) {
+  if (!item) return null;
+
   const [activeTab, setActiveTab] = useState('editions'); // 'editions', 'notes'
   const [isEditingItem, setIsEditingItem] = useState(false);
   const [isAddingEdition, setIsAddingEdition] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Edit item form state
-  const [editForm, setEditForm] = useState({
-    title: item.title,
-    release_year: item.release_year || '',
-    creator: item.creator || '',
-    runtime: item.runtime || '',
-    synopsis: item.synopsis || '',
-    poster_url: item.poster_url || '',
-    status: item.status || 'owned',
-    rating: item.rating || 0,
-    shelf_id: item.shelf_id || '',
-    user_notes: item.user_notes || '',
-    tags: Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags || '')
-  });
+  const CategoryIcon = item.category === 'tv' ? Tv : (item.category === 'game' ? Gamepad2 : Film);
+  const currentOwnership = item.ownership_status || (item.status === 'wishlist' ? 'wishlist' : (item.status === 'borrowed' ? 'borrowed' : 'owned'));
+  const currentProgress = item.progress_status || (item.status === 'in_progress' || item.status === 'completed' ? item.status : 'not_started');
 
-  // New edition form state
   const [newEdition, setNewEdition] = useState({
     format: item.category === 'game' ? 'Nintendo Switch' : (item.category === 'tv' ? 'Blu-ray' : '4K UHD'),
-    edition_name: '',
     packaging: 'Standard Case',
-    slipcover: false,
-    disc_count: 1,
-    region: 'Region Free',
+    edition_name: '',
     condition: 'Mint',
     purchase_price: '',
-    purchase_date: new Date().toISOString().split('T')[0],
-    retailer: '',
     storage_location: '',
-    barcode: '',
-    notes: ''
+    slipcover: false,
+    disc_count: 1
   });
 
-  const CategoryIcon = item.category === 'tv' ? Tv : (item.category === 'game' ? Gamepad2 : Film);
+  const getInitialEditForm = (currentItem) => {
+    if (!currentItem) return {};
+    const primary = currentItem.editions?.[0] || {};
+    return {
+      title: currentItem.title || '',
+      category: currentItem.category || 'movie',
+      release_year: currentItem.release_year || '',
+      creator: currentItem.creator || '',
+      runtime: currentItem.runtime || '',
+      synopsis: currentItem.synopsis || '',
+      poster_url: currentItem.poster_url || '',
+      ownership_status: currentItem.ownership_status || (currentItem.status === 'wishlist' ? 'wishlist' : (currentItem.status === 'borrowed' ? 'borrowed' : 'owned')),
+      progress_status: currentItem.progress_status || (currentItem.status === 'in_progress' || currentItem.status === 'completed' ? currentItem.status : 'not_started'),
+      status: currentItem.status || 'owned',
+      rating: currentItem.rating || 0,
+      shelf_id: currentItem.shelf_id || '',
+      user_notes: currentItem.user_notes || '',
+      tags: Array.isArray(currentItem.tags) ? currentItem.tags.join(', ') : (currentItem.tags || ''),
+      // Physical Edition Details (from primary edition)
+      edition_id: primary.id || null,
+      format: primary.format || (currentItem.category === 'game' ? 'Nintendo Switch' : (currentItem.category === 'tv' ? 'Blu-ray' : '4K UHD')),
+      packaging: primary.packaging || 'Standard Case',
+      edition_name: primary.edition_name || 'Standard Edition',
+      condition: primary.condition || 'Mint',
+      purchase_price: primary.purchase_price !== undefined && primary.purchase_price !== null ? primary.purchase_price : '',
+      storage_location: primary.storage_location || '',
+      slipcover: Boolean(primary.slipcover)
+    };
+  };
+
+  const [editForm, setEditForm] = useState(() => getInitialEditForm(item));
+
+  // Keep editForm and newEdition synced whenever item changes
+  useEffect(() => {
+    if (item) {
+      setEditForm(getInitialEditForm(item));
+      setNewEdition(prev => ({
+        ...prev,
+        format: item.category === 'game' ? 'Nintendo Switch' : (item.category === 'tv' ? 'Blu-ray' : '4K UHD')
+      }));
+    }
+  }, [item]);
+
+  const handleEditCategoryChange = (newCat) => {
+    const validFormats = getFormatsForCategory(newCat);
+    const isValid = validFormats.some(f => f.value === editForm.format);
+    const nextFormat = isValid ? editForm.format : (DEFAULT_FORMAT_BY_CATEGORY[newCat] || '4K UHD');
+    setEditForm(prev => ({
+      ...prev,
+      category: newCat,
+      format: nextFormat
+    }));
+  };
+
+  const handleSelectEditionToEdit = (editionId) => {
+    const edObj = item.editions?.find(e => e.id === editionId);
+    if (!edObj) return;
+    setEditForm(prev => ({
+      ...prev,
+      edition_id: edObj.id,
+      format: edObj.format || (prev.category === 'game' ? 'Nintendo Switch' : '4K UHD'),
+      packaging: edObj.packaging || 'Standard Case',
+      edition_name: edObj.edition_name || 'Standard Edition',
+      condition: edObj.condition || 'Mint',
+      purchase_price: edObj.purchase_price !== undefined && edObj.purchase_price !== null ? edObj.purchase_price : '',
+      storage_location: edObj.storage_location || '',
+      slipcover: Boolean(edObj.slipcover)
+    }));
+  };
 
   const handleSaveItemEdit = async (e) => {
     e.preventDefault();
+    if (!editForm.title.trim()) {
+      alert('Please enter a title');
+      return;
+    }
     setLoading(true);
     try {
-      const updated = await client.put(`/items/${item.id}`, {
-        ...editForm,
+      const payload = {
+        title: editForm.title.trim(),
+        category: editForm.category,
+        release_year: editForm.release_year ? parseInt(editForm.release_year, 10) : null,
+        creator: editForm.creator,
+        runtime: editForm.runtime,
+        synopsis: editForm.synopsis,
+        poster_url: editForm.poster_url,
+        ownership_status: editForm.ownership_status,
+        progress_status: editForm.progress_status,
+        rating: parseFloat(editForm.rating) || 0,
         shelf_id: editForm.shelf_id ? parseInt(editForm.shelf_id, 10) : null,
-        tags: editForm.tags.split(',').map(t => t.trim()).filter(Boolean)
-      });
+        user_notes: editForm.user_notes,
+        tags: editForm.tags ? editForm.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        edition: {
+          id: editForm.edition_id,
+          format: editForm.format,
+          packaging: editForm.packaging,
+          edition_name: editForm.edition_name || 'Standard Edition',
+          condition: editForm.condition,
+          purchase_price: editForm.purchase_price ? parseFloat(editForm.purchase_price) : 0,
+          storage_location: editForm.storage_location,
+          slipcover: editForm.slipcover ? 1 : 0
+        }
+      };
+
+      const updated = await client.put(`/items/${item.id}`, payload);
       onUpdateItem(updated.item);
       setIsEditingItem(false);
+      if (onRefreshData) onRefreshData();
     } catch (err) {
       alert('Error updating item: ' + err.message);
     } finally {
@@ -72,12 +156,21 @@ export function ItemDetailModal({
     }
   };
 
-  const handleQuickStatusChange = async (newStatus) => {
+  const handleQuickOwnershipChange = async (newOwnership) => {
     try {
-      const updated = await client.put(`/items/${item.id}`, { status: newStatus });
+      const updated = await client.put(`/items/${item.id}`, { ownership_status: newOwnership });
       onUpdateItem(updated.item);
     } catch (err) {
-      alert('Error changing status: ' + err.message);
+      alert('Error changing possession status: ' + err.message);
+    }
+  };
+
+  const handleQuickProgressChange = async (newProgress) => {
+    try {
+      const updated = await client.put(`/items/${item.id}`, { progress_status: newProgress });
+      onUpdateItem(updated.item);
+    } catch (err) {
+      alert('Error changing progress status: ' + err.message);
     }
   };
 
@@ -152,8 +245,8 @@ export function ItemDetailModal({
               <div>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="uppercase text-[11px] font-bold tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
-                      {item.category}
+                    <span className="uppercase text-[11px] font-bold tracking-wider text-forest-400 bg-forest-400/10 px-2.5 py-0.5 rounded-full border border-forest-400/20">
+                      {item.category === 'tv' ? 'TV Show' : (item.category === 'game' ? 'Game' : 'Movie')}
                     </span>
                     {item.release_year && (
                       <span className="text-sm font-semibold text-slate-300">
@@ -166,6 +259,20 @@ export function ItemDetailModal({
                         {item.runtime}
                       </span>
                     )}
+                    {item.created_at && (
+                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-forest-400/80" />
+                        Added {(() => {
+                          try {
+                            const normalized = item.created_at.includes('T') ? item.created_at : item.created_at.replace(' ', 'T') + 'Z';
+                            const d = new Date(normalized);
+                            return isNaN(d.getTime()) ? item.created_at : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                          } catch {
+                            return item.created_at;
+                          }
+                        })()}
+                      </span>
+                    )}
                   </div>
 
                   <button
@@ -176,7 +283,7 @@ export function ItemDetailModal({
                   </button>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mt-2 font-display">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mt-2 tracking-tight">
                   {item.title}
                 </h1>
 
@@ -198,28 +305,54 @@ export function ItemDetailModal({
                 )}
               </div>
 
-              {/* Status and Rating controls */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-800">
-                {/* Status selector */}
-                <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
-                  {[
-                    { id: 'owned', label: 'Owned' },
-                    { id: 'in_progress', label: 'Playing/Watching' },
-                    { id: 'completed', label: 'Completed' },
-                    { id: 'wishlist', label: 'Wishlist' }
-                  ].map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => handleQuickStatusChange(s.id)}
-                      className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
-                        item.status === s.id
-                          ? 'bg-amber-500 text-slate-950 font-bold shadow'
-                          : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
+              {/* Dual Status and Rating controls */}
+              <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-800">
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Aspect 1: Possession / Ownership */}
+                  <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 px-1.5">Possession:</span>
+                    {[
+                      { id: 'owned', label: 'Owned' },
+                      { id: 'borrowed', label: 'Borrowed' },
+                      { id: 'wishlist', label: 'Wishlist' }
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => handleQuickOwnershipChange(s.id)}
+                        className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                          currentOwnership === s.id
+                            ? (s.id === 'borrowed' ? 'bg-indigo-500 text-white font-bold shadow' : (s.id === 'wishlist' ? 'bg-purple-500 text-white font-bold shadow' : 'bg-forest-600 text-white font-bold shadow'))
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Aspect 2: Progress / Watch / Play */}
+                  <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 px-1.5">Progress:</span>
+                    {[
+                      { id: 'not_started', label: 'Backlog' },
+                      { id: 'in_progress', label: item.category === 'game' ? 'Playing' : 'Watching' },
+                      { id: 'completed', label: 'Completed' }
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => handleQuickProgressChange(s.id)}
+                        className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                          currentProgress === s.id
+                            ? (s.id === 'completed' ? 'bg-emerald-500 text-white font-bold shadow' : (s.id === 'in_progress' ? 'bg-blue-500 text-white font-bold shadow' : 'bg-slate-600 text-white font-bold shadow'))
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Rating Stars (1 to 10) */}
@@ -255,7 +388,7 @@ export function ItemDetailModal({
               onClick={() => setActiveTab('editions')}
               className={`py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === 'editions'
-                  ? 'border-amber-600 text-amber-800'
+                  ? 'border-forest-600 text-forest-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -267,7 +400,7 @@ export function ItemDetailModal({
               onClick={() => setActiveTab('notes')}
               className={`py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === 'notes'
-                  ? 'border-amber-600 text-amber-800'
+                  ? 'border-forest-600 text-forest-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -300,83 +433,298 @@ export function ItemDetailModal({
           
           {/* Edit Item Form if toggled */}
           {isEditingItem && (
-            <form onSubmit={handleSaveItemEdit} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
-              <h3 className="font-semibold text-slate-800 text-sm">Edit Title Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSaveItemEdit} className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Title</label>
-                  <input
-                    type="text"
-                    value={editForm.title}
-                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
-                    required
-                  />
+                  <h3 className="font-bold text-slate-900 text-base">Edit Title & Edition Details</h3>
+                  <p className="text-xs text-slate-500">Update general information, media format, packaging, and library records</p>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Release Year</label>
-                  <input
-                    type="number"
-                    value={editForm.release_year}
-                    onChange={(e) => setEditForm({ ...editForm, release_year: e.target.value })}
-                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Creator / Director / Developer</label>
-                  <input
-                    type="text"
-                    value={editForm.creator}
-                    onChange={(e) => setEditForm({ ...editForm, creator: e.target.value })}
-                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Assign to Shelf</label>
-                  <select
-                    value={editForm.shelf_id}
-                    onChange={(e) => setEditForm({ ...editForm, shelf_id: e.target.value })}
-                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
-                  >
-                    <option value="">None (Unsorted)</option>
-                    {shelves.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Poster Image URL</label>
-                  <input
-                    type="url"
-                    value={editForm.poster_url}
-                    onChange={(e) => setEditForm({ ...editForm, poster_url: e.target.value })}
-                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Synopsis</label>
-                  <textarea
-                    rows={3}
-                    value={editForm.synopsis}
-                    onChange={(e) => setEditForm({ ...editForm, synopsis: e.target.value })}
-                    className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsEditingItem(false)}
-                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* General Information */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">General Information</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  <div className="sm:col-span-2 lg:col-span-2">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Title *</label>
+                    <input
+                      type="text"
+                      value={editForm.title}
+                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Title Type *</label>
+                    <select
+                      value={editForm.category}
+                      onChange={(e) => handleEditCategoryChange(e.target.value)}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors font-medium cursor-pointer"
+                    >
+                      <option value="movie">Movie</option>
+                      <option value="tv">TV Show</option>
+                      <option value="game">Game</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Release Year</label>
+                    <input
+                      type="number"
+                      value={editForm.release_year}
+                      onChange={(e) => setEditForm({ ...editForm, release_year: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Runtime / Length</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 164 min or 50 hrs"
+                      value={editForm.runtime}
+                      onChange={(e) => setEditForm({ ...editForm, runtime: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 lg:col-span-2">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                      {editForm.category === 'movie' ? 'Director' : (editForm.category === 'tv' ? 'Creator / Network' : 'Developer / Publisher')}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Denis Villeneuve"
+                      value={editForm.creator}
+                      onChange={(e) => setEditForm({ ...editForm, creator: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Assign to Shelf</label>
+                    <select
+                      value={editForm.shelf_id}
+                      onChange={(e) => setEditForm({ ...editForm, shelf_id: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    >
+                      <option value="">None (Unsorted)</option>
+                      {shelves.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Rating (0 - 10)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="10"
+                      placeholder="8.5"
+                      value={editForm.rating || ''}
+                      onChange={(e) => setEditForm({ ...editForm, rating: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-1 lg:col-span-2">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Library Possession</label>
+                    <select
+                      value={editForm.ownership_status}
+                      onChange={(e) => setEditForm({ ...editForm, ownership_status: e.target.value, status: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    >
+                      <option value="owned">Owned</option>
+                      <option value="borrowed">Borrowed</option>
+                      <option value="wishlist">Wishlist</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-1 lg:col-span-2">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Watch / Play Progress</label>
+                    <select
+                      value={editForm.progress_status}
+                      onChange={(e) => setEditForm({ ...editForm, progress_status: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    >
+                      <option value="not_started">Backlog (Not Started)</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 lg:col-span-4">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Poster Image URL</label>
+                    <input
+                      type="url"
+                      value={editForm.poster_url}
+                      onChange={(e) => setEditForm({ ...editForm, poster_url: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 lg:col-span-4">
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Synopsis / Overview</label>
+                    <textarea
+                      rows={2}
+                      value={editForm.synopsis}
+                      onChange={(e) => setEditForm({ ...editForm, synopsis: e.target.value })}
+                      className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Physical Edition & Packaging Details */}
+              <div className="p-4 rounded-2xl bg-forest-50/60 border border-forest-200/80 shadow-2xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-forest-600" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-forest-800">
+                      Physical Edition & Packaging Details
+                    </h4>
+                  </div>
+                  {item.editions && item.editions.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-600">Editing Edition:</span>
+                      <select
+                        value={editForm.edition_id || ''}
+                        onChange={(e) => handleSelectEditionToEdit(parseInt(e.target.value, 10))}
+                        className="bg-white text-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-medium shadow-2xs cursor-pointer"
+                      >
+                        {item.editions.map(ed => (
+                          <option key={ed.id} value={ed.id}>
+                            {ed.edition_name || 'Standard'} ({ed.format})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Media Format *</label>
+                    <select
+                      value={editForm.format}
+                      onChange={(e) => setEditForm({ ...editForm, format: e.target.value })}
+                      className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    >
+                      {getFormatsForCategory(editForm.category).map((fmt) => (
+                        <option key={fmt.value} value={fmt.value}>
+                          {fmt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Packaging Type</label>
+                    <select
+                      value={editForm.packaging}
+                      onChange={(e) => setEditForm({ ...editForm, packaging: e.target.value })}
+                      className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    >
+                      <option value="Standard Case">Standard Keep Case</option>
+                      <option value="Steelbook">Steelbook</option>
+                      <option value="Digibook">Digibook / Digipak</option>
+                      <option value="Slipcover">Slipcase / O-Ring</option>
+                      <option value="Box Set">Collector Box Set</option>
+                      <option value="Cartridge Only">Loose Cartridge</option>
+                      <option value="Digital">Digital Code</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Edition Name / Label</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Collector's Edition, Spine #1042"
+                      value={editForm.edition_name}
+                      onChange={(e) => setEditForm({ ...editForm, edition_name: e.target.value })}
+                      className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Condition</label>
+                    <select
+                      value={editForm.condition}
+                      onChange={(e) => setEditForm({ ...editForm, condition: e.target.value })}
+                      className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    >
+                      <option value="New/Sealed">New / Sealed</option>
+                      <option value="Mint">Mint</option>
+                      <option value="Very Good">Very Good</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Purchase Price ($)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="29.99"
+                      value={editForm.purchase_price}
+                      onChange={(e) => setEditForm({ ...editForm, purchase_price: e.target.value })}
+                      className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Storage / Shelf Location</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Shelf A, Row 2"
+                      value={editForm.storage_location}
+                      onChange={(e) => setEditForm({ ...editForm, storage_location: e.target.value })}
+                      className="w-full bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:border-forest-600 focus:outline-hidden shadow-2xs transition-colors"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3 flex items-center gap-4 pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 font-medium">
+                      <input
+                        type="checkbox"
+                        checked={editForm.slipcover}
+                        onChange={(e) => setEditForm({ ...editForm, slipcover: e.target.checked })}
+                        className="rounded border-slate-300 text-forest-600 focus:ring-forest-500"
+                      />
+                      <span>Has Slipcover</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingItem(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-xs transition-colors"
+                  className="px-5 py-2 text-xs font-bold bg-forest-600 hover:bg-forest-700 text-white rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
                 >
-                  Save Changes
+                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>Save Changes</span>
                 </button>
               </div>
             </form>
@@ -392,7 +740,7 @@ export function ItemDetailModal({
                 </div>
                 <button
                   onClick={() => setIsAddingEdition(!isAddingEdition)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold shadow-xs transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-forest-50 text-forest-800 hover:bg-forest-100 border border-forest-200 text-xs font-semibold shadow-xs transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Another Edition</span>
@@ -401,28 +749,21 @@ export function ItemDetailModal({
 
               {/* Add Edition Form */}
               {isAddingEdition && (
-                <form onSubmit={handleAddEdition} className="p-5 rounded-2xl bg-white border border-amber-300 shadow-xs space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700">New Edition Details</h4>
+                <form onSubmit={handleAddEdition} className="p-5 rounded-2xl bg-white border border-forest-300 shadow-xs space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-forest-700">New Edition Details</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="text-xs font-semibold text-slate-600 mb-1 block">Format</label>
                       <select
                         value={newEdition.format}
                         onChange={(e) => setNewEdition({ ...newEdition, format: e.target.value })}
-                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden transition-colors"
                       >
-                        <option value="4K UHD">4K UHD</option>
-                        <option value="Blu-ray">Blu-ray</option>
-                        <option value="Steelbook">Steelbook</option>
-                        <option value="Criterion">Criterion Collection</option>
-                        <option value="DVD">DVD</option>
-                        <option value="VHS">VHS</option>
-                        <option value="Nintendo Switch">Nintendo Switch</option>
-                        <option value="PlayStation 5">PlayStation 5</option>
-                        <option value="PlayStation 4">PlayStation 4</option>
-                        <option value="Xbox Series X">Xbox Series X</option>
-                        <option value="PC Steam">PC / Steam</option>
-                        <option value="Digital">Digital</option>
+                        {getFormatsForCategory(item.category).map((fmt) => (
+                          <option key={fmt.value} value={fmt.value}>
+                            {fmt.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -433,7 +774,7 @@ export function ItemDetailModal({
                         placeholder="e.g. Collector's Edition, Spine #102"
                         value={newEdition.edition_name}
                         onChange={(e) => setNewEdition({ ...newEdition, edition_name: e.target.value })}
-                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden transition-colors"
                       />
                     </div>
 
@@ -442,7 +783,7 @@ export function ItemDetailModal({
                       <select
                         value={newEdition.packaging}
                         onChange={(e) => setNewEdition({ ...newEdition, packaging: e.target.value })}
-                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden transition-colors"
                       >
                         <option value="Standard Case">Standard Keep Case</option>
                         <option value="Steelbook">Steelbook</option>
@@ -459,7 +800,7 @@ export function ItemDetailModal({
                       <select
                         value={newEdition.condition}
                         onChange={(e) => setNewEdition({ ...newEdition, condition: e.target.value })}
-                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden transition-colors"
                       >
                         <option value="New/Sealed">New / Sealed</option>
                         <option value="Mint">Mint</option>
@@ -477,7 +818,7 @@ export function ItemDetailModal({
                         placeholder="29.99"
                         value={newEdition.purchase_price}
                         onChange={(e) => setNewEdition({ ...newEdition, purchase_price: e.target.value })}
-                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden transition-colors"
                       />
                     </div>
 
@@ -488,7 +829,7 @@ export function ItemDetailModal({
                         placeholder="e.g. Living Room Shelf A"
                         value={newEdition.storage_location}
                         onChange={(e) => setNewEdition({ ...newEdition, storage_location: e.target.value })}
-                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors"
+                        className="w-full bg-slate-50 hover:bg-white text-slate-900 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-hidden transition-colors"
                       />
                     </div>
 
@@ -498,7 +839,7 @@ export function ItemDetailModal({
                           type="checkbox"
                           checked={newEdition.slipcover}
                           onChange={(e) => setNewEdition({ ...newEdition, slipcover: e.target.checked })}
-                          className="rounded border-slate-300 text-amber-500 focus:ring-amber-400"
+                          className="rounded border-slate-300 text-forest-600 focus:ring-forest-500"
                         />
                         <span>Includes Slipcover</span>
                       </label>
@@ -516,7 +857,7 @@ export function ItemDetailModal({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-4 py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-xs transition-colors"
+                      className="px-4 py-2 text-xs font-semibold bg-forest-600 hover:bg-forest-700 text-white rounded-lg shadow-xs transition-colors"
                     >
                       Save Edition
                     </button>
@@ -551,7 +892,7 @@ export function ItemDetailModal({
                           {ed.disc_count > 1 && <span>• {ed.disc_count} Discs</span>}
                           {ed.storage_location && (
                             <span className="flex items-center gap-1 text-slate-700 font-medium">
-                              <MapPin className="w-3 h-3 text-amber-500" />
+                              <MapPin className="w-3 h-3 text-forest-600" />
                               {ed.storage_location}
                             </span>
                           )}
@@ -563,7 +904,17 @@ export function ItemDetailModal({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            handleSelectEditionToEdit(ed.id);
+                            setIsEditingItem(true);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-forest-600 rounded-lg hover:bg-forest-50 transition-colors"
+                          title="Edit this edition"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
                         {item.editions.length > 1 && (
                           <button
                             onClick={() => handleDeleteEdition(ed.id)}
@@ -609,7 +960,7 @@ export function ItemDetailModal({
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Tags</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {item.tags.map((t, idx) => (
-                      <span key={idx} className="text-xs bg-amber-50 text-amber-800 border border-amber-200 font-medium px-2.5 py-1 rounded-md shadow-2xs">
+                      <span key={idx} className="text-xs bg-forest-50 text-forest-800 border border-forest-200 font-medium px-2.5 py-1 rounded-md shadow-2xs">
                         #{t}
                       </span>
                     ))}

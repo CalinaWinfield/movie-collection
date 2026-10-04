@@ -6,7 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 // GET /api/items - list items with filters
 router.get('/', requireAuth, (req, res) => {
   const userId = req.userId;
-  const { category, shelf_id, format, status, search, sort } = req.query;
+  const { category, shelf_id, format, status, ownership_status, progress_status, search, sort } = req.query;
 
   let query = `
     SELECT i.*, 
@@ -31,9 +31,27 @@ router.get('/', requireAuth, (req, res) => {
     params.push(shelf_id);
   }
 
+  if (ownership_status && ownership_status !== 'all') {
+    query += ` AND i.ownership_status = ?`;
+    params.push(ownership_status);
+  }
+
+  if (progress_status && progress_status !== 'all') {
+    query += ` AND i.progress_status = ?`;
+    params.push(progress_status);
+  }
+
   if (status && status !== 'all') {
-    query += ` AND i.status = ?`;
-    params.push(status);
+    if (['owned', 'borrowed', 'wishlist'].includes(status)) {
+      query += ` AND i.ownership_status = ?`;
+      params.push(status);
+    } else if (['in_progress', 'completed', 'not_started'].includes(status)) {
+      query += ` AND i.progress_status = ?`;
+      params.push(status);
+    } else {
+      query += ` AND i.status = ?`;
+      params.push(status);
+    }
   }
 
   if (format && format !== 'all') {
@@ -147,6 +165,8 @@ router.post('/', requireAuth, (req, res) => {
     poster_url,
     backdrop_url,
     status = 'owned',
+    ownership_status,
+    progress_status,
     rating = 0,
     user_notes,
     tags,
@@ -163,12 +183,16 @@ router.post('/', requireAuth, (req, res) => {
   const genresStr = Array.isArray(genres) ? JSON.stringify(genres) : (genres || '');
   const tagsStr = Array.isArray(tags) ? JSON.stringify(tags) : (tags || '');
 
+  const resolvedOwnership = ownership_status || (status === 'borrowed' ? 'borrowed' : (status === 'wishlist' ? 'wishlist' : 'owned'));
+  const resolvedProgress = progress_status || (status === 'in_progress' ? 'in_progress' : (status === 'completed' ? 'completed' : 'not_started'));
+  const legacyStatus = resolvedOwnership === 'wishlist' ? 'wishlist' : (resolvedProgress === 'completed' ? 'completed' : (resolvedProgress === 'in_progress' ? 'in_progress' : 'owned'));
+
   const { lastInsertRowid: itemId } = dbHelper.run(
     `INSERT INTO items (
       user_id, category, title, original_title, release_year, creator,
       genres, runtime, synopsis, poster_url, backdrop_url,
-      status, rating, user_notes, tags, shelf_id, barcode, is_favorite
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      status, ownership_status, progress_status, rating, user_notes, tags, shelf_id, barcode, is_favorite
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       req.userId,
       category,
@@ -181,7 +205,9 @@ router.post('/', requireAuth, (req, res) => {
       synopsis?.trim() || null,
       poster_url?.trim() || null,
       backdrop_url?.trim() || null,
-      status,
+      legacyStatus,
+      resolvedOwnership,
+      resolvedProgress,
       parseFloat(rating) || 0,
       user_notes?.trim() || null,
       tagsStr,
@@ -247,13 +273,37 @@ router.put('/:id', requireAuth, (req, res) => {
   const allowedFields = [
     'category', 'title', 'original_title', 'release_year', 'creator',
     'genres', 'runtime', 'synopsis', 'poster_url', 'backdrop_url',
-    'status', 'rating', 'user_notes', 'tags', 'shelf_id', 'barcode', 'is_favorite'
+    'status', 'ownership_status', 'progress_status', 'rating', 'user_notes', 'tags', 'shelf_id', 'barcode', 'is_favorite'
   ];
 
+  const body = { ...req.body };
+  if (body.status !== undefined) {
+    if (['owned', 'borrowed', 'wishlist'].includes(body.status)) {
+      body.ownership_status = body.status;
+    } else if (['in_progress', 'completed', 'not_started'].includes(body.status)) {
+      body.progress_status = body.status;
+    }
+  }
+
+  // Keep legacy status column in sync with valid enum values ('owned', 'wishlist', 'in_progress', 'completed')
+  if (body.ownership_status !== undefined || body.progress_status !== undefined) {
+    const effOwnership = body.ownership_status !== undefined ? body.ownership_status : existing.ownership_status;
+    const effProgress = body.progress_status !== undefined ? body.progress_status : existing.progress_status;
+    if (effOwnership === 'wishlist') {
+      body.status = 'wishlist';
+    } else if (effProgress === 'completed') {
+      body.status = 'completed';
+    } else if (effProgress === 'in_progress') {
+      body.status = 'in_progress';
+    } else {
+      body.status = 'owned';
+    }
+  }
+
   for (const field of allowedFields) {
-    if (req.body[field] !== undefined) {
+    if (body[field] !== undefined) {
       updates.push(`${field} = ?`);
-      let val = req.body[field];
+      let val = body[field];
       if (field === 'title') val = typeof val === 'string' ? (val.trim() || existing.title) : existing.title;
       else if (field === 'category') val = typeof val === 'string' ? (val.trim() || existing.category) : existing.category;
       else if (field === 'release_year') val = val ? parseInt(val, 10) : null;
@@ -274,6 +324,56 @@ router.put('/:id', requireAuth, (req, res) => {
       `UPDATE items SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`,
       params
     );
+  }
+
+  // Update edition details if provided in payload
+  if (body.edition) {
+    const ed = body.edition;
+    let targetEditionId = ed.id;
+    if (!targetEditionId) {
+      const firstEd = dbHelper.get('SELECT id FROM editions WHERE item_id = ? ORDER BY id ASC LIMIT 1', [itemId]);
+      targetEditionId = firstEd ? firstEd.id : null;
+    }
+
+    if (targetEditionId) {
+      const edUpdates = [];
+      const edParams = [];
+      const edFields = [
+        'format', 'edition_name', 'packaging', 'slipcover', 'disc_count',
+        'region', 'condition', 'purchase_price', 'purchase_date', 'retailer',
+        'storage_location', 'barcode', 'notes'
+      ];
+      for (const f of edFields) {
+        if (ed[f] !== undefined) {
+          edUpdates.push(`${f} = ?`);
+          let val = ed[f];
+          if (f === 'slipcover') val = val ? 1 : 0;
+          else if (f === 'purchase_price') val = parseFloat(val) || 0.0;
+          else if (f === 'disc_count') val = parseInt(val, 10) || 1;
+          else if (typeof val === 'string') val = val.trim() || null;
+          edParams.push(val === undefined ? null : val);
+        }
+      }
+      if (edUpdates.length > 0) {
+        edParams.push(targetEditionId, itemId);
+        dbHelper.run(`UPDATE editions SET ${edUpdates.join(', ')} WHERE id = ? AND item_id = ?`, edParams);
+      }
+    } else if (ed.format) {
+      dbHelper.run(
+        `INSERT INTO editions (item_id, format, edition_name, packaging, slipcover, condition, purchase_price, storage_location)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          itemId,
+          ed.format,
+          ed.edition_name || 'Standard Edition',
+          ed.packaging || 'Standard Case',
+          ed.slipcover ? 1 : 0,
+          ed.condition || 'Mint',
+          parseFloat(ed.purchase_price) || 0.0,
+          ed.storage_location || null
+        ]
+      );
+    }
   }
 
   const updated = dbHelper.get('SELECT * FROM items WHERE id = ?', [itemId]);

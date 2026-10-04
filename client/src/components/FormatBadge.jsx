@@ -27,18 +27,51 @@ export function FormatBadge({ format, packaging, slipcover, size = 'sm' }) {
   } else if (f.includes('ps4') || f.includes('playstation 4')) {
     bgClass = 'bg-indigo-600/20 text-indigo-300 border-indigo-500/40';
     label = 'PS4';
+  } else if (f.includes('ps3') || f.includes('playstation 3')) {
+    bgClass = 'bg-blue-600/20 text-blue-300 border-blue-500/40';
+    label = 'PS3';
+  } else if (f.includes('ps2') || f.includes('playstation 2')) {
+    bgClass = 'bg-blue-700/20 text-blue-300 border-blue-600/40';
+    label = 'PS2';
+  } else if (f.includes('ps1') || f.includes('playstation 1')) {
+    bgClass = 'bg-slate-600/20 text-slate-300 border-slate-500/40';
+    label = 'PS1';
+  } else if (f.includes('switch') || f.includes('nintendo switch')) {
+    bgClass = 'bg-red-600/20 text-red-400 border-red-500/40';
+    label = 'SWITCH';
+  } else if (f.includes('3ds') || f.includes('nintendo ds')) {
+    bgClass = 'bg-rose-600/20 text-rose-300 border-rose-500/40';
+    label = '3DS / DS';
+  } else if (f.includes('wii')) {
+    bgClass = 'bg-sky-500/20 text-sky-200 border-sky-400/40';
+    label = f.includes('wii u') ? 'WII U' : 'WII';
+  } else if (f.includes('nintendo')) {
+    bgClass = 'bg-red-600/20 text-red-400 border-red-500/40';
+    label = 'NINTENDO';
   } else if (f.includes('xbox')) {
     bgClass = 'bg-emerald-600/20 text-emerald-300 border-emerald-500/40';
-    label = 'XBOX';
+    if (f.includes('series')) label = 'XBOX SERIES';
+    else if (f.includes('one')) label = 'XBOX ONE';
+    else if (f.includes('360')) label = 'XBOX 360';
+    else label = 'XBOX';
   } else if (f.includes('pc') || f.includes('steam')) {
     bgClass = 'bg-purple-600/20 text-purple-300 border-purple-500/40';
     label = 'PC';
+  } else if (f.includes('laserdisc')) {
+    bgClass = 'bg-yellow-600/20 text-yellow-300 border-yellow-500/40';
+    label = 'LASERDISC';
+  } else if (f.includes('cartridge')) {
+    bgClass = 'bg-amber-700/20 text-amber-300 border-amber-600/40';
+    label = 'CARTRIDGE';
   } else if (f.includes('vhs')) {
     bgClass = 'bg-pink-600/20 text-pink-300 border-pink-500/40 font-mono';
     label = 'VHS';
   } else if (f.includes('dvd')) {
     bgClass = 'bg-slate-700/40 text-slate-300 border-slate-600/40';
     label = 'DVD';
+  } else if (f.includes('digital')) {
+    bgClass = 'bg-teal-600/20 text-teal-300 border-teal-500/40';
+    label = 'DIGITAL';
   }
 
   const isSmall = size === 'sm';
@@ -56,7 +89,7 @@ export function FormatBadge({ format, packaging, slipcover, size = 'sm' }) {
       )}
 
       {slipcover ? (
-        <span className={`inline-flex items-center rounded border border-amber-500/30 bg-amber-950/40 text-amber-300/90 font-medium ${isSmall ? 'text-[9px] px-1.5 py-0.5' : 'text-[11px] px-2 py-0.5'}`} title="Has Slipcover">
+        <span className={`inline-flex items-center rounded border border-emerald-500/30 bg-emerald-950/40 text-emerald-300/90 font-medium ${isSmall ? 'text-[9px] px-1.5 py-0.5' : 'text-[11px] px-2 py-0.5'}`} title="Has Slipcover">
           Slipcover
         </span>
       ) : null}

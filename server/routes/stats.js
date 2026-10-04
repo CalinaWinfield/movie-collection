@@ -18,7 +18,23 @@ router.get('/', requireAuth, (req, res) => {
 
   const totalItems = categoryCounts.reduce((acc, row) => acc + row.count, 0);
 
-  // Status breakdown
+  // Status breakdowns
+  const ownershipCounts = dbHelper.query(
+    `SELECT COALESCE(ownership_status, 'owned') as ownership_status, COUNT(*) as count 
+     FROM items 
+     WHERE user_id = ? 
+     GROUP BY ownership_status`,
+    [userId]
+  );
+
+  const progressCounts = dbHelper.query(
+    `SELECT COALESCE(progress_status, 'not_started') as progress_status, COUNT(*) as count 
+     FROM items 
+     WHERE user_id = ? 
+     GROUP BY progress_status`,
+    [userId]
+  );
+
   const statusCounts = dbHelper.query(
     `SELECT status, COUNT(*) as count 
      FROM items 
@@ -101,6 +117,8 @@ router.get('/', requireAuth, (req, res) => {
     totalItems,
     categoryCounts: Object.fromEntries(categoryCounts.map(r => [r.category, r.count])),
     statusCounts: Object.fromEntries(statusCounts.map(r => [r.status, r.count])),
+    ownershipCounts: Object.fromEntries(ownershipCounts.map(r => [r.ownership_status, r.count])),
+    progressCounts: Object.fromEntries(progressCounts.map(r => [r.progress_status, r.count])),
     formatCounts,
     packagingCounts,
     slipcoverCount,

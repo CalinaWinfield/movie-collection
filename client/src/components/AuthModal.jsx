@@ -48,17 +48,17 @@ export function AuthModal() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 relative overflow-hidden">
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-200/40 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-forest-200/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-blue-200/40 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl p-8">
         
         {/* Brand Logo & Headline */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md mx-auto mb-4">
-            <Disc className="w-9 h-9 text-slate-950 animate-spin-slow" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md mx-auto mb-4">
+            <Disc className="w-9 h-9 text-white animate-spin-slow" />
           </div>
-          <h1 className="font-display font-black text-2xl tracking-wider text-slate-900">
+          <h1 className="font-extrabold text-2xl tracking-tight text-slate-900">
             SHELFMARK
           </h1>
           <p className="text-xs text-slate-500 mt-1">
@@ -72,7 +72,7 @@ export function AuthModal() {
             type="button"
             onClick={() => { setIsRegister(false); setError(''); }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-              !isRegister ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              !isRegister ? 'bg-forest-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Sign In
@@ -81,7 +81,7 @@ export function AuthModal() {
             type="button"
             onClick={() => { setIsRegister(true); setError(''); }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-              isRegister ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              isRegister ? 'bg-forest-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Create Account
@@ -107,7 +107,7 @@ export function AuthModal() {
                 placeholder={isRegister ? 'cinephile' : 'Enter your username or email'}
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-none"
+                className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-none"
                 required
               />
             </div>
@@ -123,7 +123,7 @@ export function AuthModal() {
                   placeholder="alex@collector.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-none"
+                  className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-none"
                   required
                 />
               </div>
@@ -138,7 +138,7 @@ export function AuthModal() {
                 placeholder="Alex Rivers"
                 value={form.displayName}
                 onChange={(e) => setForm({ ...form, displayName: e.target.value })}
-                className="w-full bg-slate-50 text-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-none"
+                className="w-full bg-slate-50 text-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-none"
               />
             </div>
           )}
@@ -152,7 +152,7 @@ export function AuthModal() {
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-amber-500 focus:outline-none"
+                className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:bg-white focus:border-forest-600 focus:outline-none"
                 required
               />
             </div>
@@ -161,7 +161,7 @@ export function AuthModal() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+            className="w-full mt-2 py-3 rounded-xl bg-forest-600 hover:bg-forest-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             <span>{isRegister ? 'Create Collector Account' : 'Sign In to Library'}</span>
@@ -176,7 +176,7 @@ export function AuthModal() {
             disabled={loading}
             className="w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-xs"
           >
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Sparkles className="w-4 h-4 text-forest-600" />
             <span>Instant Demo (Sample 4Ks, Steelbooks & Games)</span>
           </button>
         </div>

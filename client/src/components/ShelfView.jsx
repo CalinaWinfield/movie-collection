@@ -33,7 +33,7 @@ export function ShelfView({ items, onItemClick }) {
       return {
         bg: 'bg-gradient-to-r from-neutral-800 via-neutral-900 to-neutral-800 text-white border-neutral-600',
         logoText: 'CRITERION',
-        textColor: 'text-white font-serif tracking-widest',
+        textColor: 'text-white font-bold tracking-widest',
         badgeBg: 'bg-white text-black',
         height: 'h-64 sm:h-72',
         width: 'w-10 sm:w-12',
@@ -53,6 +53,24 @@ export function ShelfView({ items, onItemClick }) {
         logoText: 'PS5',
         textColor: 'text-slate-900 font-extrabold',
         badgeBg: 'bg-sky-600 text-white',
+        height: 'h-60 sm:h-64',
+        width: 'w-9 sm:w-11',
+      };
+    } else if (primaryFormat.includes('ps4')) {
+      return {
+        bg: 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-950 text-sky-100 border-blue-500/40',
+        logoText: 'PS4',
+        textColor: 'text-sky-100 font-bold',
+        badgeBg: 'bg-blue-600 text-white',
+        height: 'h-60 sm:h-64',
+        width: 'w-9 sm:w-11',
+      };
+    } else if (primaryFormat.includes('xbox')) {
+      return {
+        bg: 'bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-950 text-emerald-100 border-emerald-500/40',
+        logoText: 'XBOX',
+        textColor: 'text-emerald-100 font-bold',
+        badgeBg: 'bg-emerald-600 text-white',
         height: 'h-60 sm:h-64',
         width: 'w-9 sm:w-11',
       };

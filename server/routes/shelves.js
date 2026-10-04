@@ -20,7 +20,7 @@ router.get('/', requireAuth, (req, res) => {
 
 // POST /api/shelves - create shelf
 router.post('/', requireAuth, (req, res) => {
-  const { name, description, icon = 'film', color = '#f59e0b' } = req.body;
+  const { name, description, icon = 'film', color = '#2d6a4f' } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'Shelf name is required' });

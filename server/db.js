@@ -26,6 +26,26 @@ async function initDb() {
 
   // Create tables and schema
   createSchema();
+
+  // Run schema migration for existing databases
+  try {
+    const tableInfo = db.exec("PRAGMA table_info(items)");
+    const cols = tableInfo[0]?.values?.map(r => r[1]) || [];
+    if (cols.length > 0) {
+      if (!cols.includes('ownership_status')) {
+        db.run("ALTER TABLE items ADD COLUMN ownership_status TEXT DEFAULT 'owned'");
+        db.run("UPDATE items SET ownership_status = 'wishlist' WHERE status = 'wishlist'");
+      }
+      if (!cols.includes('progress_status')) {
+        db.run("ALTER TABLE items ADD COLUMN progress_status TEXT DEFAULT 'not_started'");
+        db.run("UPDATE items SET progress_status = 'in_progress' WHERE status = 'in_progress'");
+        db.run("UPDATE items SET progress_status = 'completed' WHERE status = 'completed'");
+      }
+    }
+  } catch (err) {
+    console.error('Migration error:', err);
+  }
+
   saveDb();
   return db;
 }
@@ -60,7 +80,7 @@ function createSchema() {
       name TEXT NOT NULL,
       description TEXT,
       icon TEXT DEFAULT 'film',
-      color TEXT DEFAULT '#f59e0b',
+      color TEXT DEFAULT '#2d6a4f',
       sort_order INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -79,7 +99,9 @@ function createSchema() {
       synopsis TEXT,
       poster_url TEXT,
       backdrop_url TEXT,
-      status TEXT NOT NULL DEFAULT 'owned' CHECK(status IN ('owned', 'wishlist', 'in_progress', 'completed', 'dropped')),
+      status TEXT NOT NULL DEFAULT 'owned',
+      ownership_status TEXT NOT NULL DEFAULT 'owned',
+      progress_status TEXT NOT NULL DEFAULT 'not_started',
       rating REAL DEFAULT 0, -- 0 to 10 rating
       user_notes TEXT,
       tags TEXT, -- JSON array of tags

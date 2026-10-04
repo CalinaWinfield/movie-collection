@@ -36,7 +36,10 @@ router.get('/export/json', requireAuth, (req, res) => {
 router.get('/export/csv', requireAuth, (req, res) => {
   const userId = req.userId;
   const items = dbHelper.query(
-    `SELECT i.title, i.category, i.release_year, i.creator, i.status, i.rating,
+    `SELECT i.title, i.category, i.release_year, i.creator, 
+            COALESCE(i.ownership_status, 'owned') as ownership_status,
+            COALESCE(i.progress_status, 'not_started') as progress_status,
+            i.rating,
             e.format, e.packaging, e.slipcover, e.condition, e.purchase_price,
             s.name as shelf_name
      FROM items i
@@ -47,13 +50,14 @@ router.get('/export/csv', requireAuth, (req, res) => {
     [userId]
   );
 
-  const headers = ['Title', 'Category', 'Year', 'Creator/Director', 'Status', 'Rating', 'Format', 'Packaging', 'Slipcover', 'Condition', 'Price', 'Shelf'];
+  const headers = ['Title', 'Category', 'Year', 'Creator/Director', 'Ownership', 'Progress', 'Rating', 'Format', 'Packaging', 'Slipcover', 'Condition', 'Price', 'Shelf'];
   const rows = items.map(item => [
     `"${(item.title || '').replace(/"/g, '""')}"`,
     item.category || '',
     item.release_year || '',
     `"${(item.creator || '').replace(/"/g, '""')}"`,
-    item.status || '',
+    item.ownership_status || 'owned',
+    item.progress_status || 'not_started',
     item.rating || '',
     item.format || '',
     item.packaging || '',
@@ -64,7 +68,7 @@ router.get('/export/csv', requireAuth, (req, res) => {
   ]);
 
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  res.setHeader('Content-Disposition', 'attachment; filename="collection_export.csv"');
+  res.setHeader('Content-Disposition', 'attachment; filename="shelfmark_export.csv"');
   res.setHeader('Content-Type', 'text/csv');
   res.send(csv);
 });
@@ -80,12 +84,16 @@ router.post('/import', requireAuth, (req, res) => {
   for (const item of data.items) {
     if (!item.title || !item.category) continue;
 
+    const resolvedOwnership = item.ownership_status || (item.status === 'borrowed' ? 'borrowed' : (item.status === 'wishlist' ? 'wishlist' : 'owned'));
+    const resolvedProgress = item.progress_status || (item.status === 'in_progress' ? 'in_progress' : (item.status === 'completed' ? 'completed' : 'not_started'));
+    const legacyStatus = resolvedOwnership === 'wishlist' ? 'wishlist' : (resolvedProgress === 'completed' ? 'completed' : (resolvedProgress === 'in_progress' ? 'in_progress' : 'owned'));
+
     const { lastInsertRowid: itemId } = dbHelper.run(
       `INSERT INTO items (
         user_id, category, title, original_title, release_year, creator,
         genres, runtime, synopsis, poster_url, backdrop_url,
-        status, rating, user_notes, tags, barcode, is_favorite
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        status, ownership_status, progress_status, rating, user_notes, tags, barcode, is_favorite
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         req.userId,
         item.category,
@@ -98,7 +106,9 @@ router.post('/import', requireAuth, (req, res) => {
         item.synopsis || null,
         item.poster_url || null,
         item.backdrop_url || null,
-        item.status || 'owned',
+        legacyStatus,
+        resolvedOwnership,
+        resolvedProgress,
         item.rating || 0,
         item.user_notes || null,
         typeof item.tags === 'string' ? item.tags : JSON.stringify(item.tags || []),
@@ -155,7 +165,7 @@ router.post('/seed-sample', requireAuth, (req, res) => {
   // Make sure user has basic shelves
   let shelf4k = dbHelper.get('SELECT id FROM shelves WHERE user_id = ? AND name = ?', [userId, '4K Steelbooks']);
   if (!shelf4k) {
-    const { lastInsertRowid } = dbHelper.run('INSERT INTO shelves (user_id, name, icon, color) VALUES (?, ?, ?, ?)', [userId, '4K Steelbooks', 'disc', '#f59e0b']);
+    const { lastInsertRowid } = dbHelper.run('INSERT INTO shelves (user_id, name, icon, color) VALUES (?, ?, ?, ?)', [userId, '4K Steelbooks', 'disc', '#2d6a4f']);
     shelf4k = { id: lastInsertRowid };
   }
 
@@ -400,11 +410,15 @@ router.post('/seed-sample', requireAuth, (req, res) => {
 
   let added = 0;
   for (const item of sampleItems) {
+    const resolvedOwnership = item.ownership_status || (item.status === 'borrowed' ? 'borrowed' : (item.status === 'wishlist' ? 'wishlist' : 'owned'));
+    const resolvedProgress = item.progress_status || (item.status === 'in_progress' ? 'in_progress' : (item.status === 'completed' ? 'completed' : 'not_started'));
+    const legacyStatus = resolvedOwnership === 'wishlist' ? 'wishlist' : (resolvedProgress === 'completed' ? 'completed' : (resolvedProgress === 'in_progress' ? 'in_progress' : 'owned'));
+
     const { lastInsertRowid: itemId } = dbHelper.run(
       `INSERT INTO items (
         user_id, category, title, release_year, creator, genres,
-        runtime, synopsis, poster_url, status, rating, shelf_id, is_favorite
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        runtime, synopsis, poster_url, status, ownership_status, progress_status, rating, shelf_id, is_favorite
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         userId,
         item.category,
@@ -415,7 +429,9 @@ router.post('/seed-sample', requireAuth, (req, res) => {
         item.runtime,
         item.synopsis,
         item.poster_url,
-        item.status,
+        legacyStatus,
+        resolvedOwnership,
+        resolvedProgress,
         item.rating,
         item.shelf_id,
         item.is_favorite

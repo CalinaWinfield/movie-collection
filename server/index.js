@@ -37,9 +37,16 @@ app.get('/api/health', (req, res) => {
 // Serve frontend build if exists
 const clientDist = path.join(__dirname, '../client/dist');
 if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
+  app.use(express.static(clientDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
@@ -242,16 +249,20 @@ async function ensureDemoData() {
 
     const { lastInsertRowid: shelf4kId } = dbHelper.run(
       'INSERT INTO shelves (user_id, name, icon, color) VALUES (?, ?, ?, ?)',
-      [demoUserId, '4K Steelbooks', 'disc', '#f59e0b']
+      [demoUserId, '4K Steelbooks', 'disc', '#2d6a4f']
     );
 
     for (const item of sampleItems) {
       const shelfId = item.category === 'movie' ? shelf4kId : shelfFavsId;
+      const resolvedOwnership = item.ownership_status || (item.status === 'borrowed' ? 'borrowed' : (item.status === 'wishlist' ? 'wishlist' : 'owned'));
+      const resolvedProgress = item.progress_status || (item.status === 'in_progress' ? 'in_progress' : (item.status === 'completed' ? 'completed' : 'not_started'));
+      const legacyStatus = resolvedOwnership === 'wishlist' ? 'wishlist' : (resolvedProgress === 'completed' ? 'completed' : (resolvedProgress === 'in_progress' ? 'in_progress' : 'owned'));
+
       const { lastInsertRowid: itemId } = dbHelper.run(
         `INSERT INTO items (
           user_id, category, title, release_year, creator, genres,
-          runtime, synopsis, poster_url, status, rating, shelf_id, is_favorite
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          runtime, synopsis, poster_url, status, ownership_status, progress_status, rating, shelf_id, is_favorite
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           demoUserId,
           item.category,
@@ -262,7 +273,9 @@ async function ensureDemoData() {
           item.runtime,
           item.synopsis,
           item.poster_url,
-          item.status,
+          legacyStatus,
+          resolvedOwnership,
+          resolvedProgress,
           item.rating,
           shelfId,
           item.is_favorite

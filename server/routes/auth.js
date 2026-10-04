@@ -44,7 +44,7 @@ router.post('/register', (req, res) => {
   // Create default starter shelves for the user
   const defaultShelves = [
     { name: 'Favorites', icon: 'heart', color: '#ef4444' },
-    { name: '4K Steelbooks', icon: 'disc', color: '#f59e0b' },
+    { name: '4K Steelbooks', icon: 'disc', color: '#2d6a4f' },
     { name: 'Criterion Collection', icon: 'film', color: '#6366f1' },
     { name: 'Watchlist / Backlog', icon: 'clock', color: '#10b981' },
   ];

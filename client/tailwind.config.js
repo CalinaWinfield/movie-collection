@@ -11,12 +11,29 @@ export default {
         surface: '#ffffff',
         'surface-elevated': '#f1f5f9',
         'surface-border': '#e2e8f0',
+        forest: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#2d6a4f', // Forest Green main
+          600: '#1e5631', // Deep Forest Green
+          700: '#164327', // Rich Pine Forest
+          800: '#11341f',
+          900: '#0b2415',
+          950: '#05140b',
+        },
         brand: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#2d6a4f',
+          600: '#1e5631',
+          700: '#164327',
+          800: '#11341f',
         },
         edition: {
           '4k': '#eab308',
@@ -32,11 +49,12 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Cinzel', 'Inter', 'serif']
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        display: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif']
       },
       boxShadow: {
-        'glow-gold': '0 4px 20px -2px rgba(245, 158, 11, 0.25)',
+        'glow-forest': '0 4px 20px -2px rgba(45, 106, 79, 0.35)',
+        'glow-gold': '0 4px 20px -2px rgba(45, 106, 79, 0.25)',
         'case': '2px 4px 12px rgba(0, 0, 0, 0.45), inset -1px 0 2px rgba(255, 255, 255, 0.25)',
       }
     },
