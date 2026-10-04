@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#090b10] text-slate-100 antialiased font-sans;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom collector scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #232c3d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #364259;
+}
+
+/* Physical shelf spine perspective */
+.shelf-board {
+  background: linear-gradient(180deg, #1f2736 0%, #151b26 40%, #0d1118 100%);
+  box-shadow: 0 12px 24px -4px rgba(0,0,0,0.8), inset 0 2px 2px rgba(255,255,255,0.1);
+  border-bottom: 4px solid #090c12;
+}
+
+.case-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.case-sheen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  transition: 0.75s ease;
+  pointer-events: none;
+}
+
+.case-sheen:hover::after {
+  left: 200%;
+}
