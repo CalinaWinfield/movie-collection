@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Disc, Lock, User, Mail, Sparkles, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { DiscIcon } from '../components/DiscIcon';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginPage({ initialMode = 'login', onNavigate }) {
@@ -89,10 +90,10 @@ export function LoginPage({ initialMode = 'login', onNavigate }) {
 
         <div 
           onClick={() => onNavigate && onNavigate('/')}
-          className="flex items-center gap-2.5 cursor-pointer"
+          className="flex items-center gap-2.5 cursor-pointer group"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md">
-            <Disc className="w-5 h-5 text-white animate-spin-slow" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md p-1 group-hover:scale-105 transition-transform">
+            <DiscIcon className="w-full h-full animate-spin-slow" />
           </div>
           <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 flex items-center gap-1.5">
             SHELFMARK
@@ -116,8 +117,8 @@ export function LoginPage({ initialMode = 'login', onNavigate }) {
           
           {/* Brand Header */}
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md mx-auto mb-3">
-              <Disc className="w-8 h-8 text-white animate-spin-slow" />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md mx-auto mb-3 p-2">
+              <DiscIcon className="w-full h-full animate-spin-slow" />
             </div>
             <h1 className="font-extrabold text-2xl tracking-tight text-slate-900">
               {isRegister ? 'Create Your Account' : 'Sign in to Shelfmark'}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Disc, Lock, User, Mail, Sparkles, Loader2 } from 'lucide-react';
+import { DiscIcon } from './DiscIcon';
 import { useAuth } from '../context/AuthContext';
 
 export function AuthModal() {
@@ -55,8 +56,8 @@ export function AuthModal() {
         
         {/* Brand Logo & Headline */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md mx-auto mb-4">
-            <Disc className="w-9 h-9 text-white animate-spin-slow" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md mx-auto mb-4 p-2.5">
+            <DiscIcon className="w-full h-full animate-spin-slow" />
           </div>
           <h1 className="font-extrabold text-2xl tracking-tight text-slate-900">
             SHELFMARK

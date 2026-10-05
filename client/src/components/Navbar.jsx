@@ -4,6 +4,7 @@ import {
   BarChart3, Download, User, LogOut, Sparkles,
   LayoutGrid, StretchHorizontal, Home
 } from 'lucide-react';
+import { DiscIcon } from './DiscIcon';
 import { useAuth } from '../context/AuthContext';
 
 export function Navbar({ 
@@ -34,7 +35,7 @@ export function Navbar({
   }, []);
 
   const categories = [
-    { id: 'all', label: 'All Media', icon: Disc },
+    { id: 'all', label: 'All Media', icon: DiscIcon },
     { id: 'movie', label: 'Movies', icon: Film },
     { id: 'tv', label: 'TV Shows', icon: Tv },
     { id: 'game', label: 'Games', icon: Gamepad2 },
@@ -47,9 +48,9 @@ export function Navbar({
           
           {/* Logo & Category Switcher */}
           <div className="flex items-center gap-5">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentCategory('all')}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md">
-                <Disc className="w-6 h-6 text-white animate-spin-slow" />
+            <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => setCurrentCategory('all')}>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md p-1.5 group-hover:scale-105 transition-transform">
+                <DiscIcon className="w-full h-full animate-spin-slow" />
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-xl tracking-tight text-slate-900 flex items-center gap-1.5">

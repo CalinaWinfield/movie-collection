@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="50%" stop-color="#1b4332" />
+      <stop offset="100%" stop-color="#0f291e" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded forest/emerald badge matching the app logo container -->
+  <rect width="100" height="100" rx="22" fill="url(#brandGradient)" />
+  
+  <!-- Optical disc body -->
+  <circle cx="50" cy="50" r="38" fill="#18181b" />
+
+  <!-- Upper-left specular glare / reflection wedge -->
+  <path d="M 39.31 44.55 L 16.14 32.75 A 38 38 0 0 1 32.75 16.14 L 44.55 39.31 A 12 12 0 0 0 39.31 44.55 Z" fill="#ffffff" />
+
+  <!-- Lower-right specular glare / reflection wedge -->
+  <path d="M 60.69 55.45 L 83.86 67.25 A 38 38 0 0 1 67.25 83.86 L 55.45 60.69 A 12 12 0 0 0 60.69 55.45 Z" fill="#ffffff" />
+
+  <!-- Center clamping hub (white ring with dark border) -->
+  <circle cx="50" cy="50" r="12" fill="#ffffff" stroke="#18181b" stroke-width="1.4" />
+
+  <!-- Center spindle hole -->
+  <circle cx="50" cy="50" r="5.2" fill="#18181b" />
+</svg>
