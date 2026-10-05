@@ -1,11 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const { dbHelper } = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 // GET /api/stats - collector insights
-router.get('/', requireAuth, (req, res) => {
-  const userId = req.userId;
+router.get('/', optionalAuth, (req, res) => {
+  let userId = req.userId;
+  if (!userId) {
+    const demo = dbHelper.get("SELECT id FROM users WHERE username = 'cinephile' LIMIT 1") || dbHelper.get("SELECT id FROM users ORDER BY id ASC LIMIT 1");
+    userId = demo ? demo.id : null;
+  }
+  if (!userId) {
+    return res.json({
+      totalItems: 0,
+      slipcoverCount: 0,
+      highestRating: 0,
+      formats: [],
+      genres: [],
+      shelves: [],
+      categoryCounts: { movie: 0, tv: 0, game: 0 },
+      ownershipCounts: {},
+      progressCounts: {}
+    });
+  }
 
   // Total items and category breakdown
   const categoryCounts = dbHelper.query(

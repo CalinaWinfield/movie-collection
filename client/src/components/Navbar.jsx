@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Film, Tv, Gamepad2, Disc, Search, Plus, Layers, 
   BarChart3, Download, User, LogOut, Sparkles,
-  LayoutGrid, StretchHorizontal
+  LayoutGrid, StretchHorizontal, Home
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,7 +16,8 @@ export function Navbar({
   onOpenAddModal,
   onOpenShelvesModal,
   onOpenStatsModal,
-  onOpenBackupModal
+  onOpenBackupModal,
+  onNavigate
 }) {
   const { user, logout, loginDemo } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -45,7 +46,7 @@ export function Navbar({
         <div className="flex items-center justify-between h-16 gap-4">
           
           {/* Logo & Category Switcher */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentCategory('all')}>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 via-forest-500 to-forest-700 flex items-center justify-center shadow-md">
                 <Disc className="w-6 h-6 text-white animate-spin-slow" />
@@ -60,6 +61,16 @@ export function Navbar({
                 <span className="text-[11px] text-slate-500 -mt-1 tracking-tight">Physical & Media Library</span>
               </div>
             </div>
+
+            {/* Home link */}
+            <button
+              onClick={() => onNavigate ? onNavigate('/') : (window.location.href = '/')}
+              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+              title="Return to Home Showcase"
+            >
+              <Home className="w-3.5 h-3.5 text-forest-600" />
+              <span>Home</span>
+            </button>
 
             {/* Category tabs */}
             <nav className="hidden md:flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
@@ -146,60 +157,82 @@ export function Navbar({
               <span className="hidden sm:inline">Insights</span>
             </button>
 
-            {/* Add Item Button */}
-            <button
-              onClick={onOpenAddModal}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-xl text-white bg-forest-600 hover:bg-forest-700 shadow-sm transition-all"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span className="hidden sm:inline">Add Title</span>
-            </button>
+            {/* If user is signed in: show Add Title & User profile. If guest: show Sign In & Create Account */}
+            {user ? (
+              <>
+                <button
+                  onClick={onOpenAddModal}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-xl text-white bg-forest-600 hover:bg-forest-700 shadow-sm transition-all"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                  <span className="hidden sm:inline">Add Title</span>
+                </button>
 
-            {/* User Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:border-forest-600/70 shadow-xs transition-all"
-                title={user?.display_name || user?.username}
-              >
-                <User className="w-4 h-4 text-slate-600" />
-              </button>
-
-              {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-50 text-sm">
-                  <div className="px-4 py-2 border-b border-slate-100">
-                    <p className="font-bold text-slate-900 truncate">{user?.display_name || user?.username}</p>
-                    <p className="text-xs text-slate-500 truncate">@{user?.username}</p>
-                  </div>
-
+                <div className="relative" ref={dropdownRef}>
                   <button
-                    onClick={() => { setUserDropdownOpen(false); onOpenBackupModal(); }}
-                    className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2.5 transition-colors"
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:border-forest-600/70 shadow-xs transition-all"
+                    title={user?.display_name || user?.username}
                   >
-                    <Download className="w-4 h-4 text-forest-600" />
-                    <span>Import / Export & Backup</span>
+                    <User className="w-4 h-4 text-slate-600" />
                   </button>
 
-                  <button
-                    onClick={() => { setUserDropdownOpen(false); loginDemo(); }}
-                    className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2.5 transition-colors"
-                  >
-                    <Sparkles className="w-4 h-4 text-sky-500" />
-                    <span>Switch to Demo Library</span>
-                  </button>
+                  {userDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-50 text-sm">
+                      <div className="px-4 py-2 border-b border-slate-100">
+                        <p className="font-bold text-slate-900 truncate">{user?.display_name || user?.username}</p>
+                        <p className="text-xs text-slate-500 truncate">@{user?.username}</p>
+                      </div>
 
-                  <div className="border-t border-slate-100 my-1"></div>
+                      <button
+                        onClick={() => { setUserDropdownOpen(false); onOpenBackupModal(); }}
+                        className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2.5 transition-colors"
+                      >
+                        <Download className="w-4 h-4 text-forest-600" />
+                        <span>Import / Export & Backup</span>
+                      </button>
 
-                  <button
-                    onClick={() => { setUserDropdownOpen(false); logout(); }}
-                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors font-medium"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
-                  </button>
+                      <button
+                        onClick={() => { setUserDropdownOpen(false); loginDemo(); }}
+                        className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2.5 transition-colors"
+                      >
+                        <Sparkles className="w-4 h-4 text-sky-500" />
+                        <span>Switch to Demo Library</span>
+                      </button>
+
+                      <div className="border-t border-slate-100 my-1"></div>
+
+                      <button
+                        onClick={() => { 
+                          setUserDropdownOpen(false); 
+                          logout(); 
+                          if (onNavigate) onNavigate('/login');
+                        }}
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors font-medium"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onNavigate && onNavigate('/login')}
+                  className="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl transition-all shadow-2xs"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => onNavigate && onNavigate('/register')}
+                  className="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white bg-forest-600 hover:bg-forest-700 rounded-xl shadow-xs transition-all"
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
 
           </div>
 

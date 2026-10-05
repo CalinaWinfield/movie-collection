@@ -1,11 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { dbHelper } = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 // GET /api/items - list items with filters
-router.get('/', requireAuth, (req, res) => {
-  const userId = req.userId;
+router.get('/', optionalAuth, (req, res) => {
+  let userId = req.userId;
+  if (!userId) {
+    const demo = dbHelper.get("SELECT id FROM users WHERE username = 'cinephile' LIMIT 1") || dbHelper.get("SELECT id FROM users ORDER BY id ASC LIMIT 1");
+    userId = demo ? demo.id : null;
+  }
+  if (!userId) {
+    return res.json({ items: [] });
+  }
   const { category, shelf_id, format, status, ownership_status, progress_status, search, sort } = req.query;
 
   let query = `

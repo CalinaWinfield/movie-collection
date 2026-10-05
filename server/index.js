@@ -44,6 +44,7 @@ if (fs.existsSync(clientDist)) {
       }
     }
   }));
+
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

@@ -17,7 +17,9 @@ export function ItemDetailModal({
   onUpdateItem, 
   onDeleteItem, 
   shelves = [],
-  onRefreshData 
+  onRefreshData,
+  isGuest = false,
+  onRequireAuth
 }) {
   if (!item) return null;
 
@@ -157,6 +159,10 @@ export function ItemDetailModal({
   };
 
   const handleQuickOwnershipChange = async (newOwnership) => {
+    if (isGuest && onRequireAuth) {
+      onRequireAuth();
+      return;
+    }
     try {
       const updated = await client.put(`/items/${item.id}`, { ownership_status: newOwnership });
       onUpdateItem(updated.item);
@@ -166,6 +172,10 @@ export function ItemDetailModal({
   };
 
   const handleQuickProgressChange = async (newProgress) => {
+    if (isGuest && onRequireAuth) {
+      onRequireAuth();
+      return;
+    }
     try {
       const updated = await client.put(`/items/${item.id}`, { progress_status: newProgress });
       onUpdateItem(updated.item);
@@ -175,6 +185,10 @@ export function ItemDetailModal({
   };
 
   const handleRatingChange = async (newRating) => {
+    if (isGuest && onRequireAuth) {
+      onRequireAuth();
+      return;
+    }
     try {
       const updated = await client.put(`/items/${item.id}`, { rating: newRating });
       onUpdateItem(updated.item);
@@ -185,6 +199,10 @@ export function ItemDetailModal({
 
   const handleAddEdition = async (e) => {
     e.preventDefault();
+    if (isGuest && onRequireAuth) {
+      onRequireAuth();
+      return;
+    }
     setLoading(true);
     try {
       await client.post(`/items/${item.id}/editions`, {
@@ -203,6 +221,10 @@ export function ItemDetailModal({
   };
 
   const handleDeleteEdition = async (editionId) => {
+    if (isGuest && onRequireAuth) {
+      onRequireAuth();
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this edition?')) return;
     try {
       await client.delete(`/items/editions/${editionId}`);
@@ -411,7 +433,13 @@ export function ItemDetailModal({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsEditingItem(!isEditingItem)}
+              onClick={() => {
+                if (isGuest && onRequireAuth) {
+                  onRequireAuth();
+                  return;
+                }
+                setIsEditingItem(!isEditingItem);
+              }}
               className="text-xs text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 font-medium flex items-center gap-1.5 shadow-xs transition-colors"
             >
               <Edit3 className="w-3.5 h-3.5" />
@@ -419,7 +447,13 @@ export function ItemDetailModal({
             </button>
 
             <button
-              onClick={() => onDeleteItem(item.id)}
+              onClick={() => {
+                if (isGuest && onRequireAuth) {
+                  onRequireAuth();
+                  return;
+                }
+                onDeleteItem(item.id);
+              }}
               className="text-xs text-red-600 hover:text-red-700 bg-white hover:bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-200 flex items-center gap-1.5 shadow-xs transition-colors"
               title="Delete from collection"
             >

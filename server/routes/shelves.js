@@ -1,10 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const { dbHelper } = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 
 // GET /api/shelves - get all user shelves with item counts
-router.get('/', requireAuth, (req, res) => {
+router.get('/', optionalAuth, (req, res) => {
+  let userId = req.userId;
+  if (!userId) {
+    const demo = dbHelper.get("SELECT id FROM users WHERE username = 'cinephile' LIMIT 1") || dbHelper.get("SELECT id FROM users ORDER BY id ASC LIMIT 1");
+    userId = demo ? demo.id : null;
+  }
+  if (!userId) {
+    return res.json({ shelves: [] });
+  }
+
   const shelves = dbHelper.query(
     `SELECT s.*, 
       (SELECT COUNT(*) FROM items WHERE shelf_id = s.id AND user_id = s.user_id) as item_count,
@@ -12,7 +21,7 @@ router.get('/', requireAuth, (req, res) => {
      FROM shelves s
      WHERE s.user_id = ?
      ORDER BY s.sort_order ASC, s.id ASC`,
-    [req.userId]
+    [userId]
   );
 
   res.json({ shelves });
