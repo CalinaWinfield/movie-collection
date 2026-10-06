@@ -6,7 +6,7 @@ const { requireAuth, optionalAuth } = require('../middleware/auth');
 // GET /api/items - list items with filters
 router.get('/', optionalAuth, (req, res) => {
   let userId = req.userId;
-  if (!userId) {
+  if (!userId || req.query.demo === 'true' || req.query.demo === '1') {
     const demo = dbHelper.get("SELECT id FROM users WHERE username = 'cinephile' LIMIT 1") || dbHelper.get("SELECT id FROM users ORDER BY id ASC LIMIT 1");
     userId = demo ? demo.id : null;
   }
@@ -105,6 +105,51 @@ router.get('/', optionalAuth, (req, res) => {
   const items = dbHelper.query(query, params);
 
   // Fetch all editions for these items to attach them
+  const itemIds = items.map(item => item.id);
+  let editionsByItem = {};
+  if (itemIds.length > 0) {
+    const placeholders = itemIds.map(() => '?').join(',');
+    const allEditions = dbHelper.query(
+      `SELECT * FROM editions WHERE item_id IN (${placeholders}) ORDER BY id ASC`,
+      itemIds
+    );
+    for (const ed of allEditions) {
+      if (!editionsByItem[ed.item_id]) editionsByItem[ed.item_id] = [];
+      editionsByItem[ed.item_id].push(ed);
+    }
+  }
+
+  const result = items.map(item => ({
+    ...item,
+    genres: item.genres ? tryParseJson(item.genres) : [],
+    tags: item.tags ? tryParseJson(item.tags) : [],
+    editions: editionsByItem[item.id] || []
+  }));
+
+  res.json({ items: result });
+});
+
+// GET /api/items/demo - list media items exclusively from the demo account
+router.get('/demo', (req, res) => {
+  const demo = dbHelper.get("SELECT id FROM users WHERE username = 'cinephile' LIMIT 1") || dbHelper.get("SELECT id FROM users ORDER BY id ASC LIMIT 1");
+  if (!demo) {
+    return res.json({ items: [] });
+  }
+
+  const query = `
+    SELECT i.*, 
+      s.name as shelf_name, s.color as shelf_color,
+      (SELECT COUNT(*) FROM editions WHERE item_id = i.id) as edition_count,
+      (SELECT format FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_format,
+      (SELECT packaging FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_packaging,
+      (SELECT slipcover FROM editions WHERE item_id = i.id ORDER BY id ASC LIMIT 1) as primary_slipcover
+    FROM items i
+    LEFT JOIN shelves s ON i.shelf_id = s.id
+    WHERE i.user_id = ?
+    ORDER BY i.id ASC
+  `;
+  const items = dbHelper.query(query, [demo.id]);
+
   const itemIds = items.map(item => item.id);
   let editionsByItem = {};
   if (itemIds.length > 0) {

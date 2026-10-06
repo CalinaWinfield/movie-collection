@@ -4,7 +4,7 @@ import {
   ArrowRight, ShieldCheck, Play, Pause, 
   CheckCircle2, Compass, Library, 
   Barcode, BarChart3, ChevronRight, X, ExternalLink,
-  Eye
+  Eye, LogOut
 } from 'lucide-react';
 import { DiscIcon } from '../components/DiscIcon';
 import { useAuth } from '../context/AuthContext';
@@ -41,36 +41,6 @@ const INITIAL_DEMO_MEDIA = [
     poster_url: 'https://upload.wikimedia.org/wikipedia/en/4/4a/Oppenheimer_%28film%29.jpg',
     synopsis: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.',
     slipcover: true
-  },
-  {
-    id: 3,
-    title: 'Seven Samurai',
-    category: 'movie',
-    format: 'Criterion 4K',
-    packaging: 'Digibook',
-    edition_name: 'Criterion Collection #2 (4K Remastered Digipak)',
-    release_year: 1954,
-    rating: 10,
-    creator: 'Akira Kurosawa',
-    genres: ['Action', 'Drama'],
-    poster_url: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Seven_Samurai_poster.jpg',
-    synopsis: 'Farmers in a village hire seven ronin to protect their crops from bandits in 16th century Japan.',
-    slipcover: true
-  },
-  {
-    id: 4,
-    title: 'Breaking Bad',
-    category: 'tv',
-    format: 'Blu-ray',
-    packaging: 'Box Set',
-    edition_name: 'Complete Series Barrel Collector Box Set',
-    release_year: 2008,
-    rating: 9.9,
-    creator: 'Vince Gilligan (AMC)',
-    genres: ['Crime', 'Drama', 'Thriller'],
-    poster_url: 'https://upload.wikimedia.org/wikipedia/en/6/61/Breaking_Bad_title_card.png',
-    synopsis: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing methamphetamine with a former student.',
-    slipcover: false
   },
   {
     id: 5,
@@ -116,21 +86,111 @@ const INITIAL_DEMO_MEDIA = [
     poster_url: 'https://images.metahub.space/poster/small/tt0068128/img',
     synopsis: 'The misadventures of a cantankerous junk dealer and his frustrated son in Los Angeles.',
     slipcover: false
+  },
+  {
+    id: 21,
+    title: 'Minecraft',
+    category: 'game',
+    format: 'PC Steam',
+    packaging: 'Standard Case',
+    edition_name: 'Standard Edition',
+    release_year: 2009,
+    rating: 8.8,
+    creator: 'Mojang',
+    genres: ['Sandbox', 'Survival'],
+    poster_url: 'https://m.media-amazon.com/images/M/MV5BMjM4MzE0MGItY2U4OS00MTU5LTgwNWUtYzMxZjMzMTQ5Yjg1XkEyXkFqcGc@._V1_.jpg',
+    synopsis: 'Explore infinite randomly generated worlds and build everything from simple homes to grand castles.',
+    slipcover: false
+  },
+  {
+    id: 29,
+    title: 'Red Dead Redemption II',
+    category: 'game',
+    format: 'PlayStation 5',
+    packaging: 'Standard Case',
+    edition_name: 'Special Edition',
+    release_year: 2018,
+    rating: 9.0,
+    creator: 'Rockstar Games',
+    genres: ['Action', 'Adventure'],
+    poster_url: 'https://m.media-amazon.com/images/M/MV5BNzRhZjRhNTAtMGM5MS00YWRkLWE0ZmQtY2M2MjM2NmM4NTI5XkEyXkFqcGc@._V1_.jpg',
+    synopsis: 'America, 1899. Arthur Morgan and the Van der Linde gang are outlaws on the run.',
+    slipcover: false
+  },
+  {
+    id: 35,
+    title: 'The Lord of the Rings: The Fellowship of the Ring',
+    category: 'movie',
+    format: '4K UHD',
+    packaging: 'Standard Case',
+    edition_name: 'Remastered Extended Edition',
+    release_year: 2001,
+    rating: 8.9,
+    creator: 'Peter Jackson',
+    genres: ['Fantasy', 'Adventure'],
+    poster_url: 'https://images.metahub.space/poster/small/tt0120737/img',
+    synopsis: 'A meek Hobbit and eight companions set out on a journey to destroy the powerful One Ring.',
+    slipcover: false
+  },
+  {
+    id: 39,
+    title: 'Die Hard',
+    category: 'movie',
+    format: 'Blu-ray',
+    packaging: 'Standard Case',
+    edition_name: '30th Anniversary Edition',
+    release_year: 1988,
+    rating: 8.2,
+    creator: 'John McTiernan',
+    genres: ['Action', 'Thriller'],
+    poster_url: 'https://images.metahub.space/poster/small/tt0095016/img',
+    synopsis: 'An NYPD officer tries to save his estranged wife and several others taken hostage by terrorists.',
+    slipcover: false
+  },
+  {
+    id: 42,
+    title: 'The Boondocks',
+    category: 'tv',
+    format: 'DVD',
+    packaging: 'Box Set',
+    edition_name: 'Complete Series Box Set',
+    release_year: 2005,
+    rating: 8.5,
+    creator: 'Aaron McGruder',
+    genres: ['Animation', 'Comedy'],
+    poster_url: 'https://images.metahub.space/poster/small/tt0373732/img',
+    synopsis: 'Huey and Riley Freeman move to the suburbs to live with their grandfather.',
+    slipcover: false
+  },
+  {
+    id: 50,
+    title: 'Breaking Bad',
+    category: 'tv',
+    format: 'DVD',
+    packaging: 'Box Set',
+    edition_name: 'Complete Series Box Set',
+    release_year: 2008,
+    rating: 9.5,
+    creator: 'Vince Gilligan',
+    genres: ['Crime', 'Drama'],
+    poster_url: 'https://images.metahub.space/poster/small/tt0903747/img',
+    synopsis: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing methamphetamine.',
+    slipcover: false
   }
 ];
 
 export function HomePage({ onNavigate }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [demoMedia, setDemoMedia] = useState(INITIAL_DEMO_MEDIA);
   const [isPaused, setIsPaused] = useState(false);
   const [previewTitle, setPreviewTitle] = useState(null);
 
-  // Fetch actual media items from the demo account via API
+  // Fetch actual media items exclusively from the demo account via dedicated API
   useEffect(() => {
     let isMounted = true;
     async function loadDemoMedia() {
       try {
-        const res = await client.get('/items');
+        const res = await client.get('/items/demo');
         if (isMounted && res.items && res.items.length > 0) {
           const formatted = res.items.map(item => ({
             id: item.id,
@@ -177,6 +237,79 @@ export function HomePage({ onNavigate }) {
     return <Film className="w-3.5 h-3.5 text-amber-600" />;
   };
 
+  // Base list for the marquee - duplicate if short to ensure it always spans wide screens
+  const marqueeList = demoMedia.length < 14 ? [...demoMedia, ...demoMedia] : demoMedia;
+
+  const renderMarqueeCard = (item, uniqueKey) => (
+    <div
+      key={uniqueKey}
+      onClick={() => setPreviewTitle(item)}
+      className="group/card relative flex-shrink-0 w-52 sm:w-60 cursor-pointer select-none rounded-2xl bg-white border border-slate-200 hover:border-forest-500 p-3 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1.5 hover:z-10 flex flex-col justify-between"
+    >
+      {/* Poster Art with glare effect */}
+      <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-200 shadow-xs">
+        <img
+          src={item.poster_url}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        
+        {/* Shimmer case glare */}
+        <div className="case-sheen absolute inset-0 pointer-events-none" />
+
+        {/* Top format tag */}
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+          <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md border backdrop-blur-md shadow-2xs ${getFormatBadgeStyle(item.format)}`}>
+            {item.format}
+          </span>
+        </div>
+
+        {/* Rating pill */}
+        {item.rating > 0 && (
+          <div className="absolute top-2 right-2 z-10 bg-white/95 backdrop-blur-md border border-slate-200 px-1.5 py-0.5 rounded-md flex items-center gap-1 text-[11px] font-bold text-amber-600 shadow-2xs">
+            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+            <span>{item.rating}</span>
+          </div>
+        )}
+
+        {/* Quick View Hover overlay */}
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-2xs opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center p-3 text-center">
+          <span className="px-3 py-1.5 rounded-xl bg-forest-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
+            <Eye className="w-3.5 h-3.5" />
+            <span>Inspect Item</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Card Meta Content */}
+      <div className="mt-3 space-y-1 text-left">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          {getCategoryIcon(item.category)}
+          <span className="capitalize font-semibold text-[11px] text-slate-700">{item.category}</span>
+          <span className="text-slate-300">•</span>
+          <span className="text-[11px]">{item.release_year || 'Classic'}</span>
+        </div>
+
+        <h4 className="font-bold text-sm text-slate-900 truncate group-hover/card:text-forest-700 transition-colors">
+          {item.title}
+        </h4>
+        
+        <div className="flex items-center justify-between text-xs text-slate-500 pt-0.5">
+          <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 truncate max-w-[120px]">
+            {item.packaging}
+          </span>
+
+          {item.slipcover && (
+            <span className="text-[10px] text-forest-800 font-semibold bg-forest-50 px-1.5 py-0.5 rounded border border-forest-200">
+              Slipcover
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans overflow-x-hidden selection:bg-forest-600/20">
       
@@ -200,34 +333,25 @@ export function HomePage({ onNavigate }) {
             <div className="flex flex-col">
               <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 flex items-center gap-2">
                 SHELFMARK
-                <span className="text-[10px] font-bold uppercase tracking-widest text-forest-700 bg-forest-50 px-2 py-0.5 rounded-md border border-forest-200">
-                  COLLECTOR
-                </span>
               </span>
               <span className="text-xs text-slate-500 font-medium">Physical Media & Game Archive</span>
             </div>
           </div>
 
-          {/* Center Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <a href="#showcase" className="hover:text-forest-700 transition-colors flex items-center gap-1.5">
-              <span>Demo Media Window</span>
-            </a>
-            <a href="#features" className="hover:text-forest-700 transition-colors">
-              Collector Features
-            </a>
-            <a href="#formats" className="hover:text-forest-700 transition-colors">
-              Formats & Discs
-            </a>
-          </nav>
-
           {/* Right Action Buttons */}
           <div className="flex items-center gap-3">
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <span className="hidden sm:inline text-xs text-slate-500">
                   Signed in as <strong className="text-forest-700">{user.display_name || user.username}</strong>
                 </span>
+                <button
+                  onClick={() => logout()}
+                  className="px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-red-600 bg-white hover:bg-red-50/80 border border-slate-200 hover:border-red-200 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
                 <button
                   onClick={() => onNavigate && onNavigate('/dashboard')}
                   className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-forest-600 hover:bg-forest-700 text-white shadow-xs flex items-center gap-2 transition-all hover:translate-y-[-1px] cursor-pointer"
@@ -322,7 +446,7 @@ export function HomePage({ onNavigate }) {
             </div>
             <div className="flex items-center justify-center gap-2 bg-white py-2.5 px-3 rounded-xl border border-slate-200 shadow-2xs">
               <Barcode className="w-4 h-4 text-amber-600" />
-              <span>Instant TMDB Auto-fill</span>
+              <span>Instant TMDb & Steam Auto-fill</span>
             </div>
             <div className="flex items-center justify-center gap-2 bg-white py-2.5 px-3 rounded-xl border border-slate-200 shadow-2xs">
               <BarChart3 className="w-4 h-4 text-purple-600" />
@@ -347,29 +471,20 @@ export function HomePage({ onNavigate }) {
             {/* Window Top Titlebar / Control Deck */}
             <div className="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/90">
               
-              {/* Window Title & Live Status */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
-                  </span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-forest-800">
-                    Demo Account Media
-                  </span>
+              {/* Live streaming notice & dashboard navigation (moved from bottom) */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-600">
+                <div className="flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-forest-600 shrink-0" />
+                  <span>Streaming live demo library items • Click any title to inspect physical edition specs</span>
                 </div>
-
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    Media from Demo Collection
-                    <span className="text-xs text-slate-500 font-normal hidden sm:inline">
-                      ({demoMedia.length} titles)
-                    </span>
-                  </h2>
-                  <p className="text-xs text-slate-500 hidden sm:block">
-                    Movies, TV shows, and video games currently cataloged in the demo collector profile.
-                  </p>
-                </div>
+                <span className="hidden sm:inline text-slate-300">•</span>
+                <button
+                  onClick={() => onNavigate && onNavigate('/dashboard')}
+                  className="font-bold text-forest-700 hover:text-forest-800 flex items-center gap-1 transition-colors group cursor-pointer"
+                >
+                  <span>Explore Full Collection Dashboard</span>
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </button>
               </div>
 
               {/* Window Controls: Play/Pause Control */}
@@ -391,107 +506,29 @@ export function HomePage({ onNavigate }) {
             </div>
 
             {/* Inner Window Display Screen (Continuous Marquee of Demo Account Media) */}
-            <div className="py-6 sm:py-8 space-y-6 sm:space-y-8 bg-slate-100/60 overflow-hidden relative">
+            <div className="py-6 sm:py-8 bg-slate-100/60 overflow-hidden relative">
               
               {/* Fade gradients on left & right viewport edges for infinite feel */}
               <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-slate-100 to-transparent z-20 pointer-events-none" />
               <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-slate-100 to-transparent z-20 pointer-events-none" />
 
-              {/* Continuous Marquee Stream of Demo Media */}
-              <div className="overflow-hidden">
+              {/* Continuous Marquee Stream of Demo Media with headroom so hover expansion is never clipped */}
+              <div className="py-4">
                 <div 
-                  className={`flex gap-5 sm:gap-6 animate-marquee-left ${isPaused ? 'is-paused' : ''}`}
+                  className={`flex w-max animate-marquee-left ${isPaused ? 'is-paused' : ''}`}
                 >
-                  {/* Repeated to form an infinite seamless loop */}
-                  {[...demoMedia, ...demoMedia, ...demoMedia].map((item, idx) => (
-                    <div
-                      key={`demo-item-${item.id}-${idx}`}
-                      onClick={() => setPreviewTitle(item)}
-                      className="group/card flex-shrink-0 w-52 sm:w-60 cursor-pointer select-none rounded-2xl bg-white border border-slate-200 hover:border-forest-500 p-3 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1.5 flex flex-col justify-between"
-                    >
-                      {/* Poster Art with glare effect */}
-                      <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-200 shadow-xs">
-                        <img
-                          src={item.poster_url}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        
-                        {/* Shimmer case glare */}
-                        <div className="case-sheen absolute inset-0 pointer-events-none" />
+                  {/* Group 1 */}
+                  <div className="flex shrink-0 gap-5 sm:gap-6 pr-5 sm:pr-6 py-2">
+                    {marqueeList.map((item, idx) => renderMarqueeCard(item, `m1-${item.id}-${idx}`))}
+                  </div>
 
-                        {/* Top format tag */}
-                        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
-                          <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md border backdrop-blur-md shadow-2xs ${getFormatBadgeStyle(item.format)}`}>
-                            {item.format}
-                          </span>
-                        </div>
-
-                        {/* Rating pill */}
-                        {item.rating > 0 && (
-                          <div className="absolute top-2 right-2 z-10 bg-white/95 backdrop-blur-md border border-slate-200 px-1.5 py-0.5 rounded-md flex items-center gap-1 text-[11px] font-bold text-amber-600 shadow-2xs">
-                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                            <span>{item.rating}</span>
-                          </div>
-                        )}
-
-                        {/* Quick View Hover overlay */}
-                        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-2xs opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center p-3 text-center">
-                          <span className="px-3 py-1.5 rounded-xl bg-forest-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Inspect Item</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Card Meta Content */}
-                      <div className="mt-3 space-y-1 text-left">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                          {getCategoryIcon(item.category)}
-                          <span className="capitalize font-semibold text-[11px] text-slate-700">{item.category}</span>
-                          <span className="text-slate-300">•</span>
-                          <span className="text-[11px]">{item.release_year || 'Classic'}</span>
-                        </div>
-
-                        <h4 className="font-bold text-sm text-slate-900 truncate group-hover/card:text-forest-700 transition-colors">
-                          {item.title}
-                        </h4>
-                        
-                        <div className="flex items-center justify-between text-xs text-slate-500 pt-0.5">
-                          <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 truncate max-w-[120px]">
-                            {item.packaging}
-                          </span>
-
-                          {item.slipcover && (
-                            <span className="text-[10px] text-forest-800 font-semibold bg-forest-50 px-1.5 py-0.5 rounded border border-forest-200">
-                              Slipcover
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                    </div>
-                  ))}
+                  {/* Group 2 (Exact duplicate for 100% mathematically seamless infinite scroll) */}
+                  <div className="flex shrink-0 gap-5 sm:gap-6 pr-5 sm:pr-6 py-2" aria-hidden="true">
+                    {marqueeList.map((item, idx) => renderMarqueeCard(item, `m2-${item.id}-${idx}`))}
+                  </div>
                 </div>
               </div>
 
-            </div>
-
-            {/* Window Bottom Dock */}
-            <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-forest-600" />
-                <span>Streaming live demo library items • Click any title to inspect physical edition specs</span>
-              </div>
-
-              <button
-                onClick={() => onNavigate && onNavigate('/dashboard')}
-                className="font-bold text-forest-700 hover:text-forest-800 flex items-center gap-1.5 transition-colors group cursor-pointer"
-              >
-                <span>Explore Full Collection Dashboard</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
             </div>
 
           </div>
@@ -545,9 +582,9 @@ export function HomePage({ onNavigate }) {
               <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700">
                 <Barcode className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Smart Barcode & TMDB Search</h3>
+              <h3 className="text-lg font-bold text-slate-900">Smart Barcode, TMDb & Steam Search</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Scan UPC barcodes or type titles. Shelfmark instantly fills directors, cast, release years, runtimes, and high-definition poster artwork.
+                Scan UPC barcodes or type titles. Shelfmark instantly fills directors, game studios, release years, runtimes, and high-definition cover artwork across movies, shows, and games via TMDb, IMDb, Steam, and IGDB.
               </p>
             </div>
 
@@ -729,7 +766,7 @@ export function HomePage({ onNavigate }) {
       <footer className="border-t border-slate-200 bg-white py-12 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 space-y-4">
         <div className="flex items-center justify-center gap-2">
           <DiscIcon className="w-5 h-5" />
-          <span className="font-bold text-slate-900 tracking-wider">SHELFMARK COLLECTOR</span>
+          <span className="font-bold text-slate-900 tracking-wider">SHELFMARK</span>
         </div>
         <p className="max-w-md mx-auto text-slate-600">
           The ultimate physical media archive for 4K UHD, Blu-ray discs, boutique box sets, and video games.

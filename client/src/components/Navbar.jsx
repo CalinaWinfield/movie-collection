@@ -55,9 +55,6 @@ export function Navbar({
               <div className="flex flex-col">
                 <span className="font-extrabold text-xl tracking-tight text-slate-900 flex items-center gap-1.5">
                   SHELFMARK
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-forest-700 bg-forest-50 px-1.5 py-0.5 rounded border border-forest-200">
-                    COLLECTOR
-                  </span>
                 </span>
                 <span className="text-[11px] text-slate-500 -mt-1 tracking-tight">Physical & Media Library</span>
               </div>

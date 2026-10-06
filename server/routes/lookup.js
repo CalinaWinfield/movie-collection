@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
+const RAWG_API_KEY = process.env.RAWG_API_KEY || '';
 
 // GET /api/lookup/search?q=...&category=movie|tv|game
 router.get('/search', async (req, res) => {
@@ -33,7 +34,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// GET /api/lookup/details?id=tt...&category=movie|tv
+// GET /api/lookup/details?id=...&category=movie|tv|game
 router.get('/details', async (req, res) => {
   const { id, category = 'movie' } = req.query;
   if (!id) {
@@ -41,6 +42,14 @@ router.get('/details', async (req, res) => {
   }
 
   try {
+    if (category === 'game') {
+      const gameDetails = await getGameDetails(id);
+      if (gameDetails) {
+        return res.json(gameDetails);
+      }
+      return res.status(404).json({ error: 'Game details not found' });
+    }
+
     const metaType = category === 'tv' ? 'series' : 'movie';
     const detailRes = await fetch(`https://v3-cinemeta.strem.io/meta/${metaType}/${encodeURIComponent(id)}.json`);
     if (detailRes.ok) {
@@ -348,65 +357,384 @@ async function searchTVMedia(query) {
 }
 
 /**
- * Searches Video Games using IMDb and Wikipedia
+ * Maps IGDB platform IDs to shelfmark format labels
  */
-async function searchGameMedia(query) {
-  const seenIds = new Set();
-  const candidates = [];
+function mapIGDBPlatformToFormat(platforms = []) {
+  const pSet = new Set(platforms);
+  if (pSet.has(167)) return 'PlayStation 5';
+  if (pSet.has(130)) return 'Nintendo Switch';
+  if (pSet.has(48)) return 'PlayStation 4';
+  if (pSet.has(169)) return 'Xbox Series X';
+  if (pSet.has(49)) return 'Xbox One';
+  if (pSet.has(9)) return 'PlayStation 3';
+  if (pSet.has(8)) return 'PlayStation 2';
+  if (pSet.has(7)) return 'PlayStation 1';
+  if (pSet.has(12)) return 'Xbox 360';
+  if (pSet.has(37) || pSet.has(20)) return 'Nintendo 3DS / DS';
+  if (pSet.has(5) || pSet.has(41)) return 'Nintendo Wii / Wii U';
+  if (pSet.has(18) || pSet.has(19) || pSet.has(4) || pSet.has(24) || pSet.has(33) || pSet.has(29)) return 'Retro Cartridge';
+  if (pSet.has(6)) return 'PC Steam';
+  return 'Nintendo Switch';
+}
 
-  // 1. IMDb Video Game suggestions
+/**
+ * Searches Video Games using official Steam Store API
+ */
+async function searchSteamGames(query) {
   try {
-    const imdbUrl = `https://v3.sg.media-imdb.com/suggestion/x/${encodeURIComponent(query)}.json`;
-    const imdbRes = await fetch(imdbUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+    const searchUrl = `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(query)}&l=english&cc=US`;
+    const res = await fetch(searchUrl, {
+      headers: { 'User-Agent': 'ShelfmarkMediaTracker/1.0 (contact@shelfmark.app)' }
     });
-    if (imdbRes.ok) {
-      const imdbData = await imdbRes.json();
-      for (const d of (imdbData.d || []).slice(0, 6)) {
-        if (!d.id || seenIds.has(d.id)) continue;
-        if (d.qid === 'videoGame' || d.q === 'video game') {
-          seenIds.add(d.id);
-          candidates.push({
-            id: d.id,
-            imdb_id: d.id,
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.items || !data.items.length) return [];
+
+    const topItems = data.items.slice(0, 5);
+    const enriched = await Promise.all(
+      topItems.map(async (item) => {
+        try {
+          const detRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${item.id}&l=english`);
+          if (!detRes.ok) return null;
+          const detData = await detRes.json();
+          const app = detData[item.id]?.data;
+          if (!app) return null;
+
+          let year = null;
+          if (app.release_date?.date) {
+            const m = app.release_date.date.match(/\b(19\d{2}|20\d{2})\b/);
+            if (m) year = parseInt(m[1], 10);
+          }
+
+          const developers = app.developers?.join(', ') || '';
+          const publishers = app.publishers?.join(', ') || '';
+          const creator = developers || publishers || 'Steam';
+
+          const metascore = app.metacritic?.score ? Math.round(app.metacritic.score / 10 * 10) / 10 : 0;
+          const poster = `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/library_600x900_2x.jpg`;
+          const backdrop = app.screenshots?.[0]?.path_full || app.header_image || null;
+          const genres = (app.genres || []).map(g => g.description);
+
+          return {
+            id: `steam-${item.id}`,
+            steam_id: item.id,
             category: 'game',
-            title: d.l,
-            release_year: d.y || null,
-            creator: d.s || 'Video Game',
-            genres: [],
-            runtime: null,
-            synopsis: null,
-            rating: 0,
-            poster_url: d.i?.imageUrl || null,
-            backdrop_url: null,
-            source: 'IMDb',
-            suggested_format: 'Nintendo Switch'
-          });
+            title: app.name,
+            release_year: year,
+            creator,
+            synopsis: (app.short_description || app.detailed_description || '').replace(/<[^>]+>/g, '').trim() || null,
+            rating: metascore,
+            genres,
+            poster_url: poster,
+            backdrop_url: backdrop,
+            source: 'Steam',
+            suggested_format: 'PC Steam'
+          };
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+
+    return enriched.filter(Boolean);
+  } catch (err) {
+    console.error('Steam search error:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Searches Video Games using IGDB (Internet Game Database)
+ */
+async function searchIGDBGames(query) {
+  try {
+    const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const clean = norm(query);
+    const words = clean.split(/\s+/).filter(Boolean);
+    const prefixes = new Set();
+
+    prefixes.add(clean.slice(0, 2));
+    for (const w of words) {
+      if (w.length >= 2) prefixes.add(w.slice(0, 2));
+    }
+    if (!clean.startsWith('th')) prefixes.add('th');
+
+    const seenIds = new Set();
+    const matches = [];
+
+    const buckets = await Promise.all(
+      Array.from(prefixes).map(async p => {
+        try {
+          const res = await fetch(`https://app.lizardbyte.dev/GameDB/buckets/${encodeURIComponent(p)}.json`);
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        return null;
+      })
+    );
+
+    for (const bucket of buckets) {
+      if (!bucket) continue;
+      for (const [id, item] of Object.entries(bucket)) {
+        if (seenIds.has(id)) continue;
+        const nameNorm = norm(item.name);
+        const matchesAll = words.every(w => nameNorm.includes(w));
+        if (matchesAll) {
+          seenIds.add(id);
+          matches.push({ id, name: item.name });
         }
       }
     }
-  } catch (e) {
-    console.error('IMDb game search error:', e.message);
-  }
 
-  // 2. Wikipedia Video Game search to complement
+    matches.sort((a, b) => {
+      const aNorm = norm(a.name);
+      const bNorm = norm(b.name);
+      const aExact = aNorm === clean || aNorm === 'the ' + clean;
+      const bExact = bNorm === clean || bNorm === 'the ' + clean;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+      const aStarts = aNorm.startsWith(clean) || aNorm.startsWith('the ' + clean);
+      const bStarts = bNorm.startsWith(clean) || bNorm.startsWith('the ' + clean);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return a.name.length - b.name.length;
+    });
+
+    const topMatches = matches.slice(0, 5);
+
+    const detailed = await Promise.all(
+      topMatches.map(async (m) => {
+        try {
+          const dRes = await fetch(`https://app.lizardbyte.dev/GameDB/games/${m.id}.json`);
+          if (!dRes.ok) return null;
+          const g = await dRes.json();
+
+          let year = null;
+          if (Array.isArray(g.release_dates) && g.release_dates.length > 0) {
+            const years = g.release_dates.map(rd => rd.y).filter(Boolean);
+            if (years.length) year = Math.min(...years);
+          }
+
+          let creator = null;
+          if (Array.isArray(g.involved_companies)) {
+            const dev = g.involved_companies.find(c => c.developer);
+            if (dev?.company?.name) {
+              creator = dev.company.name;
+            } else if (g.involved_companies[0]?.company?.name) {
+              creator = g.involved_companies[0].company.name;
+            }
+          }
+
+          let posterUrl = null;
+          if (g.cover?.url) {
+            posterUrl = (g.cover.url.startsWith('//') ? 'https:' : '') + g.cover.url.replace('/t_thumb/', '/t_1080p/');
+          }
+
+          let backdropUrl = null;
+          if (g.artworks?.[0]?.url) {
+            backdropUrl = (g.artworks[0].url.startsWith('//') ? 'https:' : '') + g.artworks[0].url.replace('/t_thumb/', '/t_1080p/');
+          } else if (g.screenshots?.[0]?.url) {
+            backdropUrl = (g.screenshots[0].url.startsWith('//') ? 'https:' : '') + g.screenshots[0].url.replace('/t_thumb/', '/t_1080p/');
+          }
+
+          const rating = g.rating ? Math.round(g.rating / 10 * 10) / 10 : 0;
+          const genres = (g.genres || []).map(gn => gn.name);
+          const suggestedFormat = mapIGDBPlatformToFormat(g.platforms || []);
+
+          return {
+            id: `igdb-${g.id}`,
+            igdb_id: g.id,
+            category: 'game',
+            title: g.name,
+            release_year: year,
+            creator: creator || 'Video Game',
+            synopsis: (g.summary || g.storyline || '').replace(/<[^>]+>/g, '').trim() || null,
+            rating,
+            genres,
+            poster_url: posterUrl,
+            backdrop_url: backdropUrl,
+            source: 'IGDB',
+            suggested_format: suggestedFormat
+          };
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+
+    return detailed.filter(Boolean);
+  } catch (err) {
+    console.error('IGDB search error:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Searches Video Games using RAWG if configured
+ */
+async function searchRAWGGames(query) {
+  if (!RAWG_API_KEY) return [];
   try {
-    const wikiResults = await searchWikipediaMedia(query, 'video game');
-    for (const w of wikiResults) {
-      if (seenIds.has(w.title.toLowerCase())) continue;
-      seenIds.add(w.title.toLowerCase());
-      candidates.push({
-        ...w,
-        source: 'Wikipedia & Game Database'
-      });
+    const rawgUrl = `https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}&page_size=5`;
+    const res = await fetch(rawgUrl);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).map(g => ({
+      id: `rawg-${g.id}`,
+      rawg_id: g.id,
+      category: 'game',
+      title: g.name,
+      release_year: g.released ? parseInt(g.released.slice(0, 4), 10) : null,
+      creator: g.publishers?.[0]?.name || g.developers?.[0]?.name || 'Video Game',
+      synopsis: null,
+      rating: g.rating ? Math.round(g.rating * 2 * 10) / 10 : 0,
+      genres: (g.genres || []).map(gn => gn.name),
+      poster_url: g.background_image || null,
+      backdrop_url: g.background_image || null,
+      source: 'RAWG',
+      suggested_format: 'Nintendo Switch'
+    }));
+  } catch (err) {
+    console.error('RAWG search error:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Fetches single game details by provider ID
+ */
+async function getGameDetails(id) {
+  if (id.startsWith('steam-')) {
+    const appId = id.replace('steam-', '');
+    try {
+      const res = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&l=english`);
+      if (res.ok) {
+        const data = await res.json();
+        const app = data[appId]?.data;
+        if (app) {
+          let year = null;
+          if (app.release_date?.date) {
+            const m = app.release_date.date.match(/\b(19\d{2}|20\d{2})\b/);
+            if (m) year = parseInt(m[1], 10);
+          }
+          const developers = app.developers?.join(', ') || '';
+          const publishers = app.publishers?.join(', ') || '';
+          const metascore = app.metacritic?.score ? Math.round(app.metacritic.score / 10 * 10) / 10 : 0;
+          return {
+            category: 'game',
+            title: app.name,
+            release_year: year,
+            creator: developers || publishers || 'Steam',
+            runtime: null,
+            synopsis: (app.short_description || app.detailed_description || '').replace(/<[^>]+>/g, '').trim() || null,
+            rating: metascore,
+            genres: (app.genres || []).map(g => g.description),
+            poster_url: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`,
+            backdrop_url: app.screenshots?.[0]?.path_full || app.header_image || null,
+            source: 'Steam',
+            suggested_format: 'PC Steam'
+          };
+        }
+      }
+    } catch (e) {}
+  } else if (id.startsWith('igdb-')) {
+    const igdbId = id.replace('igdb-', '');
+    try {
+      const res = await fetch(`https://app.lizardbyte.dev/GameDB/games/${igdbId}.json`);
+      if (res.ok) {
+        const g = await res.json();
+        let year = null;
+        if (Array.isArray(g.release_dates) && g.release_dates.length > 0) {
+          const years = g.release_dates.map(rd => rd.y).filter(Boolean);
+          if (years.length) year = Math.min(...years);
+        }
+        let creator = null;
+        if (Array.isArray(g.involved_companies)) {
+          const dev = g.involved_companies.find(c => c.developer);
+          if (dev?.company?.name) creator = dev.company.name;
+          else if (g.involved_companies[0]?.company?.name) creator = g.involved_companies[0].company.name;
+        }
+        let posterUrl = null;
+        if (g.cover?.url) {
+          posterUrl = (g.cover.url.startsWith('//') ? 'https:' : '') + g.cover.url.replace('/t_thumb/', '/t_1080p/');
+        }
+        let backdropUrl = null;
+        if (g.artworks?.[0]?.url) {
+          backdropUrl = (g.artworks[0].url.startsWith('//') ? 'https:' : '') + g.artworks[0].url.replace('/t_thumb/', '/t_1080p/');
+        } else if (g.screenshots?.[0]?.url) {
+          backdropUrl = (g.screenshots[0].url.startsWith('//') ? 'https:' : '') + g.screenshots[0].url.replace('/t_thumb/', '/t_1080p/');
+        }
+        return {
+          category: 'game',
+          title: g.name,
+          release_year: year,
+          creator: creator || 'Video Game',
+          runtime: null,
+          synopsis: (g.summary || g.storyline || '').replace(/<[^>]+>/g, '').trim() || null,
+          rating: g.rating ? Math.round(g.rating / 10 * 10) / 10 : 0,
+          genres: (g.genres || []).map(gn => gn.name),
+          poster_url: posterUrl,
+          backdrop_url: backdropUrl,
+          source: 'IGDB',
+          suggested_format: mapIGDBPlatformToFormat(g.platforms || [])
+        };
+      }
+    } catch (e) {}
+  }
+  return null;
+}
+
+/**
+ * Searches Video Games using Steam and IGDB (Internet Game Database)
+ */
+async function searchGameMedia(query) {
+  const [steamRes, igdbRes, rawgRes] = await Promise.allSettled([
+    searchSteamGames(query),
+    searchIGDBGames(query),
+    searchRAWGGames(query)
+  ]);
+
+  const steamGames = steamRes.status === 'fulfilled' ? steamRes.value : [];
+  const igdbGames = igdbRes.status === 'fulfilled' ? igdbRes.value : [];
+  const rawgGames = rawgRes.status === 'fulfilled' ? rawgRes.value : [];
+
+  const seenIds = new Set();
+  const results = [];
+  const maxLen = Math.max(igdbGames.length, steamGames.length, rawgGames.length);
+
+  for (let i = 0; i < maxLen; i++) {
+    if (i < igdbGames.length) {
+      const g = igdbGames[i];
+      if (!seenIds.has(g.id)) {
+        seenIds.add(g.id);
+        results.push(g);
+      }
     }
-  } catch (e) {
-    console.error('Wikipedia game search error:', e.message);
+    if (i < steamGames.length) {
+      const s = steamGames[i];
+      if (!seenIds.has(s.id)) {
+        seenIds.add(s.id);
+        results.push(s);
+      }
+    }
+    if (i < rawgGames.length) {
+      const r = rawgGames[i];
+      if (!seenIds.has(r.id)) {
+        seenIds.add(r.id);
+        results.push(r);
+      }
+    }
   }
 
-  return candidates.slice(0, 8);
+  // Fallback to Wikipedia if no results from Steam or IGDB
+  if (results.length === 0) {
+    const wiki = await searchWikipediaMedia(query, 'video game');
+    return wiki.map(w => ({
+      ...w,
+      source: 'Wikipedia & Game Database'
+    }));
+  }
+
+  return results.slice(0, 10);
 }
 
 /**

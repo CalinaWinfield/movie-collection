@@ -81,11 +81,17 @@ export function LoginPage({ initialMode = 'login', onNavigate }) {
       {/* Top Header Navigation */}
       <header className="relative z-20 w-full max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 py-5 flex items-center justify-between">
         <button
-          onClick={() => onNavigate && onNavigate('/dashboard')}
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else if (onNavigate) {
+              onNavigate('/');
+            }
+          }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 text-forest-600" />
-          <span>Back to Collection</span>
+          <span>Back</span>
         </button>
 
         <div 
@@ -97,9 +103,6 @@ export function LoginPage({ initialMode = 'login', onNavigate }) {
           </div>
           <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 flex items-center gap-1.5">
             SHELFMARK
-            <span className="text-[10px] font-bold uppercase tracking-wider text-forest-700 bg-forest-50 px-1.5 py-0.5 rounded border border-forest-200">
-              COLLECTOR
-            </span>
           </span>
         </div>
 

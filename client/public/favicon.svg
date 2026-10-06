@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#059669" />
-      <stop offset="50%" stop-color="#1b4332" />
-      <stop offset="100%" stop-color="#0f291e" />
+      <stop offset="0%" stop-color="#f0fdf4" />
+      <stop offset="100%" stop-color="#059467" />
     </linearGradient>
   </defs>
   <!-- Rounded forest/emerald badge matching the app logo container -->

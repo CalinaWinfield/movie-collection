@@ -278,14 +278,18 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [], initial
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[11px] font-semibold text-slate-500">Live Title Search</span>
                   <span className="text-[10px] font-bold text-forest-700 bg-forest-50 border border-forest-200/80 px-2 py-0.5 rounded-md flex items-center gap-1">
-                    <span>🎬 IMDb & The Movie Database (TMDb)</span>
+                    <span>
+                      {category === 'game' 
+                        ? '🎮 Steam & IGDB (Video Game Database)' 
+                        : (category === 'tv' ? '📺 IMDb & The Movie Database (TMDb)' : '🎬 IMDb & The Movie Database (TMDb)')}
+                    </span>
                   </span>
                 </div>
                 <div className="relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder={`Search ${category === 'movie' ? 'movies (e.g. Dune, Blade Runner)' : (category === 'tv' ? 'TV series (e.g. Breaking Bad)' : 'games (e.g. Zelda, Elden Ring)')}...`}
+                    placeholder={`Search ${category === 'movie' ? 'movies (e.g. Dune, Blade Runner)' : (category === 'tv' ? 'TV series (e.g. Breaking Bad)' : 'games (e.g. Zelda, Elden Ring, Portal)')}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full bg-white text-slate-900 pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 focus:border-forest-600 focus:outline-hidden text-sm shadow-xs transition-colors"
@@ -313,6 +317,12 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [], initial
                           <div className="w-full h-full flex items-center justify-center text-slate-400 text-[10px]">No Cover</div>
                         )}
 
+                        {res.source && (
+                          <div className="absolute top-1.5 left-1.5 bg-slate-900/85 backdrop-blur-xs text-white font-bold text-[9px] px-1.5 py-0.5 rounded border border-white/20">
+                            {res.source}
+                          </div>
+                        )}
+
                         {res.rating > 0 && (
                           <div className="absolute top-1.5 right-1.5 bg-slate-950/80 backdrop-blur-xs text-emerald-300 font-extrabold text-[10px] px-1.5 py-0.5 rounded border border-emerald-400/30">
                             ★ {res.rating}
@@ -324,7 +334,7 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [], initial
                         <div className="flex items-center justify-between text-[10px] text-slate-500 mt-0.5">
                           <span>{res.release_year || '—'}</span>
                           <span className="text-[9px] font-semibold text-slate-400 truncate max-w-[80px]">
-                            {res.creator || (res.source || 'IMDb/TMDb')}
+                            {res.creator || (res.source || (category === 'game' ? 'Steam/IGDB' : 'IMDb/TMDb'))}
                           </span>
                         </div>
                       </div>
@@ -343,7 +353,9 @@ export function AddItemModal({ isOpen, onClose, onCreated, shelves = [], initial
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-[10px] uppercase font-bold text-forest-800 bg-forest-100 px-2 py-0.5 rounded border border-forest-200">
-                          IMDb & TMDb Verified
+                          {category === 'game' 
+                            ? `${selectedCandidate?.source || 'Steam & IGDB'} Verified` 
+                            : 'IMDb & TMDb Verified'}
                         </span>
                         {form.rating > 0 && (
                           <span className="text-[10px] font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-forest-200">
