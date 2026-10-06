@@ -434,26 +434,6 @@ export function HomePage({ onNavigate }) {
             </button>
           </div>
 
-          {/* Feature Badges Bar */}
-          <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-600 font-medium">
-            <div className="flex items-center justify-center gap-2 bg-white py-2.5 px-3 rounded-xl border border-slate-200 shadow-2xs">
-              <ShieldCheck className="w-4 h-4 text-forest-600" />
-              <span>Edition-Level Precision</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 bg-white py-2.5 px-3 rounded-xl border border-slate-200 shadow-2xs">
-              <Layers className="w-4 h-4 text-sky-600" />
-              <span>Bookshelf Spine View</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 bg-white py-2.5 px-3 rounded-xl border border-slate-200 shadow-2xs">
-              <Barcode className="w-4 h-4 text-amber-600" />
-              <span>Instant TMDb & Steam Auto-fill</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 bg-white py-2.5 px-3 rounded-xl border border-slate-200 shadow-2xs">
-              <BarChart3 className="w-4 h-4 text-purple-600" />
-              <span>Investment Analytics</span>
-            </div>
-          </div>
-
         </section>
 
 
@@ -482,7 +462,7 @@ export function HomePage({ onNavigate }) {
                   onClick={() => onNavigate && onNavigate('/dashboard')}
                   className="font-bold text-forest-700 hover:text-forest-800 flex items-center gap-1 transition-colors group cursor-pointer"
                 >
-                  <span>Explore Full Collection Dashboard</span>
+                  <span>Explore Full Demo Collection Dashboard</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
